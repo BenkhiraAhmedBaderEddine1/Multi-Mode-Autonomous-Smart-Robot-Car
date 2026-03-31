@@ -11,7 +11,7 @@ An Arduino-based 4WD robotic platform integrating real-time sensor fusion for au
 
 # Multi-Mode Autonomous Smart Robot Car
 
-### 🛠 System Overview
+
 
 ```text
           _||_  <-- Ultrasonic Sensor
