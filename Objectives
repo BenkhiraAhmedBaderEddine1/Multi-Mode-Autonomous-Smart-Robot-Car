@@ -1,0 +1,25 @@
+The main objective of this project is to design and develop a smart autonomous robotic 
+car based on an Arduino embedded system. The goal is to demonstrate the effective 
+integration of hardware and software components to enable both manual and autonomous 
+operation of the vehicle. 
+The specific objectives of this project include: 
+• Designing and assembling a four-wheel-drive (4WD) robotic platform using 
+appropriate mechanical and electronic components.  
+• Implementing a reliable control system based on an Arduino microcontroller to 
+ensure real-time data processing and decision-making.  
+• Developing a Bluetooth-based wireless communication interface to allow user control 
+of the robot via a mobile application.  
+• Integrating an ultrasonic sensor to detect and avoid obstacles, enabling safe 
+navigation in dynamic environments.  
+• Implementing a line-following mechanism using infrared (IR) sensors for accurate 
+path tracking and autonomous movement.  
+• Developing and optimizing embedded software using the Arduino IDE for efficient 
+sensor data processing and motor control.  
+• Evaluating system performance in terms of accuracy, responsiveness, and reliability 
+under various operating conditions.  
+• Designing a modular and scalable architecture that can be extended with advanced 
+technologies such as artificial intelligence, computer vision, and Internet of Things 
+(IoT) in future enhancements.  
+Through these objectives, the project seeks to provide a solid understanding of robotics, 
+embedded systems, and intelligent control, while showcasing practical applications in 
+automation and smart mobility. 
