@@ -8,6 +8,33 @@ An Arduino-based 4WD robotic platform integrating real-time sensor fusion for au
 
 ---
 
+
+# Multi-Mode Autonomous Smart Robot Car
+
+### 🛠 System Overview
+
+```text
+          _||_  <-- Ultrasonic Sensor
+         |____|
+      __ /____\ __
+     |[]|      |[]|
+     |__|======|__|
+         | ARD |
+   |=====| UIN |=====|
+   |  W  |  O  |  W  |
+   |  H  |_____|  H  |
+   |  E  |     |  E  |
+   |  E  |_____|  E  |
+   |  L  |     |  L  |
+   |=====|=====|=====|
+     |[]|      |[]|
+     |__|======|__|
+```
+
+
+
+
+
 ## Project Overview
 This project presents the design and implementation of a 4WD autonomous robotic platform based on the ATmega328P microcontroller (Arduino Uno). The system is engineered to switch between three distinct operational modes, demonstrating proficiency in embedded C++ programming, sensor fusion, and hardware-software integration.
 
