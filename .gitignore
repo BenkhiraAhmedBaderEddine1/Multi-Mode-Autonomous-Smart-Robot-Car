@@ -1,41 +1,22 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+# Arduino IDE ignores
+*.elf
+*.hex
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
-*.lib
+*.ko
+*.so
+*.mod.c
+*.mod
+*.o.cmd
+*.ko.cmd
+.tmp_versions/
+build/
+applet/
 
-# Executables
-*.exe
-*.out
-*.app
+# OS-specific files
+.DS_Store
+Thumbs.db
 
-# debug information files
-*.dwo
+# Backup files
+*~
+*.bak
