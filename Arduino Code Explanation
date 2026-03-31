@@ -1,0 +1,83 @@
+# System Logic and Control Algorithm
+
+This document outlines the high-level decision-making architecture of the Autonomous Smart Robot Car, as visualized in the system flowchart.
+
+## 1. Algorithmic Flow (The Decision Tree)
+The system operates on a continuous feedback loop, categorized into three primary phases:
+
+### Phase A: Initialization & Sensing
+* **Startup:** The ATmega328P initializes all I/O pins and establishes a Serial link.
+* **Data Acquisition:** The system simultaneously polls the Bluetooth buffer and triggers the Ultrasonic sensor.
+
+### Phase B: Conditional Branching (The "Brain")
+The robot evaluates conditions in a specific hierarchy:
+1.  **Manual Override:** If a Bluetooth signal is detected, the autonomous logic is bypassed to ensure immediate user control.
+2.  **Safety Check (Obstacle Detection):** If the calculated distance is $< 20cm$, the `avoidObstacle` routine is prioritized.
+3.  **Path Tracking:** If the path is clear, the robot analyzes IR sensor reflectivity to maintain alignment with the track.
+
+### Phase C: Execution (Actuation)
+Based on the branch selected, the CPU sends PWM (Pulse Width Modulation) signals to the L298N Motor Driver to execute the required physical movement.
+
+## 2. Obstacle Avoidance Sub-Routine
+To mitigate collision risks, the algorithm follows a "Safety-First" sequence:
+`STOP` → `DELAY` → `BACKWARD` → `TURN RIGHT` → `STOP`.
+This sequence ensures that inertia is neutralized before the robot attempts a spatial re-orientation.
+
+// Pin Definitions
+const int IN1 = 5, IN2 = 6, IN3 = 10, IN4 = 11;
+const int TRIG = A4, ECHO = A5;
+const int IR_L = 2,  IR_R = 3;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+  pinMode(TRIG, OUTPUT); pinMode(ECHO, INPUT);
+  pinMode(IR_L, INPUT);  pinMode(IR_R, INPUT);
+  stopMotors();
+}
+
+void loop() {
+  // 1. Check Bluetooth Command (Manual Mode)
+  if (Serial.available() > 0) {
+    char cmd = Serial.read();
+    handleManual(cmd);
+  } 
+  // 2. Run Autonomous Logic
+  else {
+    long distance = getDistance();
+    
+    if (distance > 0 && distance < 20) {
+      handleObstacle();
+    } else {
+      handleLineFollow();
+    }
+  }
+}
+
+long getDistance() {
+  digitalWrite(TRIG, LOW); delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  return pulseIn(ECHO, HIGH) * 0.034 / 2;
+}
+
+void handleObstacle() {
+  stopMotors();    delay(200);
+  moveBackward();  delay(400);
+  turnRight();     delay(600);
+  stopMotors();
+}
+
+void handleLineFollow() {
+  bool L = digitalRead(IR_L);
+  bool R = digitalRead(IR_R);
+  
+  if (L == LOW && R == LOW) moveForward();
+  else if (L == HIGH) turnLeft();
+  else if (R == HIGH) turnRight();
+  else stopMotors();
+}
+
+// Basic movement primitives (moveForward, moveBackward, turnLeft, turnRight, stopMotors) 
+// would follow here...
