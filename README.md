@@ -2053,3 +2053,96 @@ The firmware in this report uses rule-based steering rather than a PID controlle
 
 </div>
 
+
+# 🤖 Multi-Mode Autonomous Smart Robot Car
+
+An Arduino-based 4WD robotic platform integrating Bluetooth teleoperation, autonomous obstacle avoidance, and line-following navigation.
+
+**Author:** Ahmed Bader Eddine Benkhira  
+**Institution:** University of Boumerdes (IGEE)  
+**Date:** March 17, 2024
+
+---
+
+## 6. Software Architecture
+
+### 6.1 Development Environment
+
+| Component | Description |
+|---|---|
+| Microcontroller | Arduino Uno R3 (ATmega328P) |
+| Programming Language | C++ (Arduino framework) |
+| IDE | Arduino IDE |
+| Bluetooth Communication | HC-05 using `SoftwareSerial` |
+| Ultrasonic Measurement | HC-SR04 |
+| Servo Control | SG90 using the `Servo` library |
+| Motor Driver | L298N dual H-bridge |
+| Line Detection | Three digital IR sensors |
+
+**Required libraries:**
+
+- `SoftwareSerial.h` — Bluetooth serial communication.
+- `Servo.h` — Servo positioning.
+- `Arduino.h` — Arduino core functions, included automatically by the IDE.
+
+### 6.2 Program Structure
+
+The firmware is divided into functions responsible for motor control, sensing, navigation, and communication.
+
+| Function | Purpose |
+|---|---|
+| `setDrive()` | Sets motor direction and PWM speed. |
+| `driveForward()` | Moves the robot forward. |
+| `driveBackward()` | Moves the robot backward. |
+| `turnLeft()` | Rotates or steers the robot left. |
+| `turnRight()` | Rotates or steers the robot right. |
+| `updateSonar()` | Measures the distance using the HC-SR04. |
+| `runObstacleAvoidance()` | Detects obstacles and selects an avoidance action. |
+| `runLineFollower()` | Processes IR sensor readings to follow a line. |
+| `selectMode()` | Changes the active operating mode. |
+| `handleBluetoothCommand()` | Receives and interprets Bluetooth commands. |
+| `applyManualMotion()` | Executes manual movement commands. |
+
+### 6.3 State Machine
+
+The robot operates in one of three primary modes: manual control, obstacle avoidance, or line following.
+
+```mermaid
+flowchart TD
+    A(["🚀 System Start"]) --> B["Initialize Pins, Motors,<br/>Sensors, Servo & Bluetooth"]
+    B --> C["Read Bluetooth Commands"]
+    C --> D{"Select Operating Mode"}
+
+    D -->|M| E["🎮 Manual Control"]
+    D -->|O| F["🛡️ Obstacle Avoidance"]
+    D -->|T| G["📍 Line Following"]
+
+    E --> H["Execute Movement Command"]
+    H --> C
+
+    F --> I["Measure Distance"]
+    I --> J{"Obstacle Detected?"}
+    J -->|No| K["Move Forward"]
+    J -->|Yes| L["Scan Left and Right"]
+    L --> N["Choose a Clear Direction"]
+    K --> C
+    N --> C
+
+    G --> O["Read Three IR Sensors"]
+    O --> P["Calculate Steering Action"]
+    P --> Q["Adjust Motor Direction"]
+    Q --> C
+
+    classDef start fill:#172554,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px
+    classDef process fill:#1F2937,stroke:#F97316,color:#FFFFFF,stroke-width:1.5px
+    classDef decision fill:#451A03,stroke:#FBBF24,color:#FFFFFF,stroke-width:2px
+    classDef manual fill:#172554,stroke:#60A5FA,color:#FFFFFF
+    classDef obstacle fill:#431407,stroke:#F97316,color:#FFFFFF
+    classDef line fill:#064E3B,stroke:#34D399,color:#FFFFFF
+
+    class A start
+    class B,C,H,I,K,L,N,O,P,Q process
+    class D,J decision
+    class E manual
+    class F obstacle
+    class G line
