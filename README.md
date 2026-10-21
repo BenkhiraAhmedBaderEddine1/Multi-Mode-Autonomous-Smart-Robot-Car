@@ -41,6 +41,8 @@ Wireless Teleoperation · Autonomous Navigation · Embedded Intelligence
 <img src="https://capsule-render.vercel.app/api?type=rect&height=5&color=0:FF5B69,45:FFAD48,100:B777FF"
      width="100%" alt="Design divider"/>
 
+
+
 </div>
 
 <div align="center">
