@@ -1816,3 +1816,243 @@ The selected action is translated into motor-direction signals and PWM commands 
 | PWM duty cycle | `D = T_ON / (T_ON + T_OFF)` | Defines the ON-time fraction |
 | PWM percentage | `D_percent = 100 * D` | Expresses the duty cycle as a percentage |
 | Arduino PWM command | `D_percent ≈ (PWM / 255) * 100` | Estimates the commanded PWM percentage |
+
+
+## 5.3 Differential-Drive Kinematics
+
+Although the chassis has four wheels, the proposed controller treats them as two groups: left and right.
+
+### 📐 Kinematic Variables
+
+Let:
+
+- `v_L` be the left-side linear wheel velocity.
+- `v_R` be the right-side linear wheel velocity.
+- `b` be the effective distance between the left and right wheel paths.
+- `v` be the vehicle's forward velocity.
+- `omega` be the angular turning velocity.
+
+### 🔴 Linear Velocity
+
+The simplified differential-drive model gives:
+
+$$
+v = \frac{v_R + v_L}{2}
+$$
+
+### 🟠 Angular Velocity
+
+The angular turning velocity is:
+
+$$
+\omega = \frac{v_R - v_L}{b}
+$$
+
+### ⚙️ Turning Behavior
+
+| Left-Side Speed | Right-Side Speed | Robot Motion |
+|:--|:--|:--|
+| Approximately equal | Approximately equal | Straight movement |
+| Slower | Faster | Turns left |
+| Faster | Slower | Turns right |
+| Forward | Reverse | Approximately in-place pivot |
+
+When both sides move forward at approximately equal speeds, the robot travels approximately straight.
+
+When the right side moves faster than the left, the robot turns left. When the left side moves faster than the right, the robot turns right.
+
+When the two sides move in opposite directions, the robot can perform an approximately in-place pivot, subject to wheel traction and chassis geometry.
+
+### 🧭 Differential-Drive Control Architecture
+
+```mermaid id="diff53"
+flowchart TB
+    MCU["ARDUINO UNO"]
+    SPEED["LEFT / RIGHT SPEED COMMANDS"]
+    DRIVER["L298N DUAL H-BRIDGE"]
+    
+    subgraph DRIVE["4WD DIFFERENTIAL DRIVE"]
+        direction LR
+        LEFT["LEFT GROUP<br/>M1 + M3"]
+        RIGHT["RIGHT GROUP<br/>M2 + M4"]
+    end
+
+    MOTION["ROBOT TRANSLATION<br/>AND ROTATION"]
+
+    MCU --> SPEED
+    SPEED --> DRIVER
+    DRIVER --> LEFT
+    DRIVER --> RIGHT
+    LEFT --> MOTION
+    RIGHT --> MOTION
+
+    classDef controller fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef control fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef motor fill:#25130f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef motion fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+
+    class MCU controller
+    class SPEED control
+    class DRIVER,LEFT,RIGHT motor
+    class MOTION motion
+
+    style DRIVE fill:#101010,stroke:#ff8c42,stroke-width:2px
+```
+
+<div align="center">
+
+**FIGURE 5.3 — DIFFERENTIAL-DRIVE KINEMATICS AND MOTOR GROUP CONTROL**
+
+</div>
+
+The model is an approximation because tire slip, wheel alignment, and variations between motors affect real motion.
+
+---
+
+## 5.4 Obstacle-Avoidance Decision Rule
+
+Let `d_f` denote the measured distance ahead and `d_safe` denote the safety threshold.
+
+### 📐 Obstacle Detection Condition
+
+The initial rule is:
+
+$$
+\text{Obstacle detected if } d_f < d_{\mathrm{safe}}
+$$
+
+For this implementation:
+
+$$
+d_{\mathrm{safe}} = 25\ \mathrm{cm}
+$$
+
+This is a tunable initial setting rather than a universal safe stopping distance. The appropriate threshold depends on vehicle speed, braking behavior, sensor placement, and the available space.
+
+### 🟠 Selecting an Avoidance Direction
+
+After detection, the robot compares left and right measurements:
+
+$$
+d_{\mathrm{best}} = \max(d_L,d_R)
+$$
+
+Where:
+
+- `d_L` is the measured distance on the left.
+- `d_R` is the measured distance on the right.
+- `d_best` is the larger of the two measured distances.
+
+If neither side offers the minimum clearance, the robot reverses before turning toward the side with the greater measured distance. This is a simple heuristic, not a complete geometric map of the surroundings.
+
+### 🚦 Decision Logic
+
+```mermaid id="avoid54"
+flowchart TB
+    START["MEASURE FRONT DISTANCE"]
+    CHECK{"d_f < d_safe?"}
+    FORWARD["CONTINUE FORWARD"]
+    SCAN["COMPARE LEFT AND RIGHT DISTANCES"]
+    SELECT{"Which side has<br/>greater clearance?"}
+    TURNL["TURN LEFT"]
+    TURNR["TURN RIGHT"]
+    REVERSE["REVERSE BEFORE TURNING"]
+
+    START --> CHECK
+    CHECK -->|"NO"| FORWARD
+    CHECK -->|"YES"| SCAN
+    SCAN --> SELECT
+    SELECT -->|"Left is clearer"| TURNL
+    SELECT -->|"Right is clearer"| TURNR
+    SELECT -->|"Neither side is clear"| REVERSE
+
+    classDef sensing fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef decision fill:#25130f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef safe fill:#17251a,stroke:#55b878,color:#ffffff,stroke-width:2px
+    classDef action fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+
+    class START,SCAN sensing
+    class CHECK,SELECT decision
+    class FORWARD safe
+    class TURNL,TURNR,REVERSE action
+```
+
+<div align="center">
+
+**FIGURE 5.4 — DISTANCE-BASED OBSTACLE-AVOIDANCE DECISION FLOW**
+
+</div>
+
+---
+
+## 5.5 Line-Tracking Error
+
+A three-sensor digital array provides a rough estimate of the line's position.
+
+### 🔍 Rule-Based Sensor Interpretation
+
+| Sensor Condition | Steering Response |
+|:--|:--|
+| Left sensor active | Steer left |
+| Center sensor active | Move forward |
+| Right sensor active | Steer right |
+| Left and center active | Make a gentle left correction |
+| Center and right active | Make a gentle right correction |
+| No sensors active | Treat the line as temporarily lost |
+
+*The meaning of an active sensor depends on its output polarity and the firmware configuration.*
+
+### 📐 Proportional-Integral-Derivative (PID) Model
+
+More advanced systems can represent line-position error numerically and apply a proportional, integral, and derivative controller.
+
+The general PID control equation is:
+
+$$
+u(t) = K_p e(t)
++ K_i \int_0^t e(\tau)\,d\tau
++ K_d \frac{de(t)}{dt}
+$$
+
+Where:
+
+- `u(t)` is the controller output.
+- `e(t)` is the line-position error.
+- `K_p` is the proportional gain.
+- `K_i` is the integral gain.
+- `K_d` is the derivative gain.
+- `t` is time.
+- `tau` is the integration variable.
+
+### ⚙️ PID Control Components
+
+| Component | Purpose |
+|:--|:--|
+| Proportional term | Responds to the current line-position error |
+| Integral term | Accounts for accumulated error over time |
+| Derivative term | Responds to the rate of change of error |
+
+The firmware in this report uses rule-based steering rather than a PID controller. PID remains a possible future improvement.
+
+---
+
+## 📌 Mathematical Summary
+
+| Model | Equation | Application |
+|:--|:--|:--|
+| Linear velocity | `v = (v_R + v_L) / 2` | Estimates forward velocity |
+| Angular velocity | `omega = (v_R - v_L) / b` | Estimates turning rate |
+| Obstacle detection | `d_f < d_safe` | Checks the front safety threshold |
+| Best-side clearance | `d_best = max(d_L, d_R)` | Compares left and right distances |
+| PID controller | `u(t) = Kp*e(t) + Ki*integral + Kd*derivative` | Advanced line-tracking control |
+
+---
+
+<div align="center">
+
+**🔴 END OF SECTION 5 — MATHEMATICAL FOUNDATIONS 🟠**
+
+*Multi-Mode Autonomous Smart Robot Car*
+
+</div>
+
