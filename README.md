@@ -1006,36 +1006,115 @@ A suitable design uses an appropriately rated battery pack for the motors and a 
 
 ### Power-System Overview
 
-```text
-          BATTERY PACK
-                │
-                ▼
-        ┌───────────────┐
-        │ POWER SWITCH  │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │ PROTECTION    │
-        │ FUSE          │
-        └───────┬───────┘
-                │
-         ┌──────┴─────────┐
-         │                │
-         ▼                ▼
-  MOTOR POWER       REGULATED SUPPLY
-         │                │
-         ▼                ▼
-      L298N          ARDUINO + LOGIC
-         │                │
-         ▼                ├── HC-05
-    FOUR MOTORS           ├── IR SENSORS
-                          ├── HC-SR04
-                          └── SERVO*
 
-*Servo power must be sized for its current demand.
-All required signal interfaces must share a suitable common ground.
+<div align="center">
+
+## 🟠 POWER SUPPLY & ELECTRICAL DISTRIBUTION ARCHITECTURE 🔴
+
+*Protected Battery Input • Motor Power • Regulated Logic Supply*
+
+</div>
+
+```mermaid
+flowchart TB
+    BAT["BATTERY PACK<br/>DC Power Source"]
+    SWITCH["POWER SWITCH"]
+    FUSE["PROTECTION FUSE"]
+
+    subgraph DISTRIBUTION["POWER DISTRIBUTION"]
+        direction TB
+
+        MOTOR_BRANCH["MOTOR POWER BRANCH"]
+        LOGIC_BRANCH["REGULATED SUPPLY BRANCH"]
+
+        DRIVER["L298N MOTOR DRIVER<br/>Dual H-Bridge"]
+        MOTORS["FOUR DC GEARED MOTORS"]
+
+        MCU["ARDUINO UNO<br/>Controller & Logic"]
+        BT["HC-05<br/>Bluetooth Module"]
+        IR["IR LINE SENSORS"]
+        SONAR["HC-SR04<br/>Ultrasonic Sensor"]
+        SERVO["SG90 SERVO*"]
+    end
+
+    BAT --> SWITCH
+    SWITCH --> FUSE
+
+    FUSE --> MOTOR_BRANCH
+    FUSE --> LOGIC_BRANCH
+
+    MOTOR_BRANCH --> DRIVER
+    DRIVER --> MOTORS
+
+    LOGIC_BRANCH --> MCU
+    LOGIC_BRANCH --> BT
+    LOGIC_BRANCH --> IR
+    LOGIC_BRANCH --> SONAR
+    LOGIC_BRANCH --> SERVO
+
+    GND["COMMON GROUND<br/>Required Signal Reference"]
+
+    MCU -.-> GND
+    DRIVER -.-> GND
+    BT -.-> GND
+    IR -.-> GND
+    SONAR -.-> GND
+    SERVO -.-> GND
+
+    classDef battery fill:#24140f,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef protection fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef branch fill:#171717,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef motor fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef logic fill:#191919,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef ground fill:#171717,stroke:#b8b8b8,color:#ffffff,stroke-width:2px
+
+    class BAT battery
+    class SWITCH,FUSE protection
+    class MOTOR_BRANCH,LOGIC_BRANCH branch
+    class DRIVER,MOTORS motor
+    class MCU,BT,IR,SONAR,SERVO logic
+    class GND ground
+
+    style DISTRIBUTION fill:#101010,stroke:#ff8c42,stroke-width:2px
 ```
+
+<div align="center">
+
+**🟠 FIGURE 2 — PROTECTED POWER DISTRIBUTION AND ELECTRICAL SUPPLY 🟠**
+
+</div>
+
+**Engineering notes:**
+
+- The motor supply and regulated logic supply must match the voltage and current requirements of their connected components.
+- The servo power supply must support its peak current demand.
+- All connected modules must share a suitable common ground for their signal interfaces.
+- The fuse must be appropriately rated for the wiring and expected current.
+- Do not connect the battery directly to the Arduino's 5V pin unless the supply is properly regulated to 5V and the connection is suitable for the board.
+```
+
+## 🔴 3. إضافة ملخص احترافي أسفل المخططين
+
+<CodeBlock language="markdown" editable>
+---
+
+## ⚙️ SYSTEM ARCHITECTURE SUMMARY
+
+| Subsystem | Main Component | Primary Function |
+|:--|:--|:--|
+| User Interface | Smartphone / PC | Sends remote-control commands |
+| Wireless Link | HC-05 | Transfers commands through Bluetooth |
+| Central Controller | Arduino Uno | Processes commands and sensor data |
+| Motor Control | L298N | Controls motor direction and speed |
+| Obstacle Detection | HC-SR04 | Measures distance to obstacles |
+| Line Detection | IR Sensors | Detects the line and supports tracking |
+| Steering Mechanism | SG90 Servo (optional) | Positions the ultrasonic sensor |
+| Power System | Battery, Fuse, Regulator | Supplies protected power to the system |
+
+> **Design principle:** The Arduino Uno acts as the central controller, while the Bluetooth interface enables remote operation and the sensing subsystem supports autonomous navigation. The power distribution system supplies the motors and electronics through appropriate power paths.
+
+---
+
 
 ### Example: Two 18650 Cells in Series
 
