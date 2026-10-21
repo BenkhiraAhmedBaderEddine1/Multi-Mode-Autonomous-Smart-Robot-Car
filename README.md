@@ -603,33 +603,74 @@ The L298N module is a dual H-bridge motor driver. An H-bridge allows a DC motor 
 
 ### Functional Architecture
 
-```text
-              ARDUINO UNO
-                   │
-          Direction + PWM signals
-                   │
-                   ▼
-          ┌───────────────────┐
-          │  L298N DRIVER     │
-          │                   │
-          │  ┌─────────────┐  │
-          │  │  BRIDGE A   │  │
-          │  └──────┬──────┘  │
-          │         │         │
-          │  ┌──────┴──────┐  │
-          │  │  BRIDGE B   │  │
-          │  └──────┬──────┘  │
-          └─────────┼─────────┘
-                    │
-          ┌─────────┴─────────┐
-          ▼                   ▼
-     LEFT MOTORS         RIGHT MOTORS
-       2 MOTORS             2 MOTORS
-          │                   │
-          └─────────┬─────────┘
-                    ▼
-               4WD CHASSIS
+<div align="center">
+
+## 🔴 BLUETOOTH COMMUNICATION & CONTROL ARCHITECTURE 🟠
+
+*Wireless Teleoperation • Serial Communication • Intelligent Control*
+
+</div>
+
+```mermaid
+flowchart TB
+    subgraph USER["01 — USER INTERFACE"]
+        direction TB
+        DEVICE["SMARTPHONE / PC<br/>Remote Control Interface"]
+    end
+
+    subgraph WIRELESS["02 — WIRELESS COMMUNICATION"]
+        BT["HC-05 BLUETOOTH MODULE<br/>Wireless Data Reception"]
+    end
+
+    subgraph CONTROL["03 — EMBEDDED CONTROL"]
+        MCU["ARDUINO UNO<br/>ATmega328P"]
+        UART["UART SERIAL INTERFACE"]
+        LOGIC["MOTOR / MODE LOGIC<br/>Command Processing"]
+    end
+
+    subgraph OUTPUT["04 — ROBOT CONTROL OUTPUT"]
+        MODE{"OPERATING MODE"}
+        MANUAL["MANUAL CONTROL"]
+        OBSTACLE["OBSTACLE AVOIDANCE"]
+        LINE["LINE FOLLOWING"]
+    end
+
+    DEVICE -->|"Bluetooth Wireless Link"| BT
+    BT -->|"UART Serial Data"| UART
+    UART --> MCU
+    MCU --> LOGIC
+    LOGIC --> MODE
+
+    MODE --> MANUAL
+    MODE --> OBSTACLE
+    MODE --> LINE
+
+    classDef device fill:#171717,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef wireless fill:#24140f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef controller fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef logic fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef mode fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef output fill:#171717,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+
+    class DEVICE device
+    class BT wireless
+    class MCU controller
+    class UART,LOGIC logic
+    class MODE mode
+    class MANUAL,OBSTACLE,LINE output
+
+    style USER fill:#101010,stroke:#ff8c42,stroke-width:2px
+    style WIRELESS fill:#101010,stroke:#ff6b35,stroke-width:2px
+    style CONTROL fill:#101010,stroke:#ff3b30,stroke-width:2px
+    style OUTPUT fill:#101010,stroke:#ff8c42,stroke-width:2px
 ```
+
+<div align="center">
+
+**🔴 FIGURE 1 — BLUETOOTH COMMUNICATION AND MULTI-MODE CONTROL FLOW 🟠**
+
+</div>
+
 
 ### Motor Channel Allocation
 
