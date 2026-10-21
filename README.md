@@ -2103,63 +2103,56 @@ The firmware is divided into functions responsible for motor control, sensing, n
 | `handleBluetoothCommand()` | Receives and interprets Bluetooth commands. |
 | `applyManualMotion()` | Executes manual movement commands. |
 
+
 ### 6.3 State Machine
 
-The robot operates in one of three primary modes: manual control, obstacle avoidance, or line following.
+The robot operates in one of three primary modes: manual control, obstacle avoidance, or line following. A state-machine architecture separates the operating modes and allows the controller to execute the appropriate behavior.
 
-
+```mermaid
 flowchart TD
-    A(["🚀 System Start"]) --> B["Initialize Pins, Motors,<br/>Sensors, Servo & Bluetooth"]
-    B --> C["Read Bluetooth Commands"]
-    C --> D{"Select Operating Mode"}
+    A([System Start]) --> B{Select Operating Mode}
 
-D -->|M| E["🎮 Manual Control"]
-    D -->|O| F["🛡️ Obstacle Avoidance"]
-    D -->|T| G["📍 Line Following"]
+    B -->|M: Manual| C[Manual Control]
+    B -->|O: Obstacle Avoidance| D[Obstacle Avoidance]
+    B -->|T: Line Following| E[Line Following]
 
-E --> H["Execute Movement Command"]
+    C --> F{Bluetooth Command}
+    F -->|Forward / Backward / Left / Right| G[Apply Motor Commands]
+    G --> C
+    F -->|Stop| H[Stop Motors]
     H --> C
+    F -->|Change Mode| B
 
-F --> I["Measure Distance"]
-    I --> J{"Obstacle Detected?"}
-    J -->|No| K["Move Forward"]
-    J -->|Yes| L["Scan Left and Right"]
-    L --> N["Choose a Clear Direction"]
-    K --> C
-    N --> C
+    D --> I[Measure Front Distance]
+    I --> J{Obstacle Detected?}
+    J -->|No| K[Move Forward]
+    K --> D
 
-G --> O["Read Three IR Sensors"]
-    O --> P["Calculate Steering Action"]
-    P --> Q["Adjust Motor Direction"]
-    Q --> C
+    J -->|Yes| L[Stop and Scan Left and Right]
+    L --> M{Available Direction?}
+    M -->|Left Is Clearer| N[Turn Left]
+    M -->|Right Is Clearer| O[Turn Right]
+    M -->|Both Directions Blocked| P[Reverse and Turn]
 
-classDef start fill:#172554,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px
-    classDef process fill:#1F2937,stroke:#F97316,color:#FFFFFF,stroke-width:1.5px
-    classDef decision fill:#451A03,stroke:#FBBF24,color:#FFFFFF,stroke-width:2px
-    classDef manual fill:#172554,stroke:#60A5FA,color:#FFFFFF
-    classDef obstacle fill:#431407,stroke:#F97316,color:#FFFFFF
-    classDef line fill:#064E3B,stroke:#34D399,color:#FFFFFF
+    N --> D
+    O --> D
+    P --> D
 
-class A start
-    class B,C,H,I,K,L,N,O,P,Q process
-    class D,J decision
-    class E manual
-    class F obstacle
-    class G line
+    E --> Q[Read IR Sensors]
+    Q --> R{Determine Line Position}
 
+    R -->|Centered| S[Move Forward]
+    R -->|Line Detected on Left| T[Correct Left]
+    R -->|Line Detected on Right| U[Correct Right]
+    R -->|Line Lost| V[Search Briefly or Stop]
 
-6.4 Bluetooth Command Protocol
-The HC-05 module receives commands from a smartphone or computer and transfers them to the Arduino through serial communication.
-Command	Function
-M	Activate manual mode
-O	Activate obstacle avoidance mode
-T	Activate line-following mode
-F	Move forward
-B	Move backward
-L	Turn left
-R	Turn right
-S	Stop manual movement
-+	Increase motor speed
--	Decrease motor speed
+    S --> E
+    T --> E
+    U --> E
+    V --> E
 
-Note: Commands are interpreted according to the firmware implementation. Test the command mapping and stopping behavior before operating the robot.
+    D -. Mode Change .-> B
+    E -. Mode Change .-> B
+```
+
+### 6.4 Bluetooth Command Interface
