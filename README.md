@@ -1091,9 +1091,7 @@ flowchart TB
 - All connected modules must share a suitable common ground for their signal interfaces.
 - The fuse must be appropriately rated for the wiring and expected current.
 - Do not connect the battery directly to the Arduino's 5V pin unless the supply is properly regulated to 5V and the connection is suitable for the board.
-```
 
-## 🔴 3. إضافة ملخص احترافي أسفل المخططين
 
 <CodeBlock language="markdown" editable>
 ---
