@@ -1671,69 +1671,71 @@ Pulse-Width Modulation (PWM) controls the average electrical power delivered to 
 The duty cycle is the fraction of one switching period during which the signal remains ON.
 
 $$
-\boxed{D=\frac{T_{\mathrm{ON}}}
-{T_{\mathrm{ON}}+T_{\mathrm{OFF}}}}
+D = \frac{T_{\mathrm{ON}}}{T_{\mathrm{ON}} + T_{\mathrm{OFF}}}
 $$
 
 The total switching period is:
 
 $$
-T=T_{\mathrm{ON}}+T_{\mathrm{OFF}}
+T = T_{\mathrm{ON}} + T_{\mathrm{OFF}}
 $$
 
 Therefore:
 
 $$
-D=\frac{T_{\mathrm{ON}}}{T}
+D = \frac{T_{\mathrm{ON}}}{T}
 $$
 
 Expressed as a percentage:
 
 $$
-\boxed{D_{\%}=100D}
+D_{\mathrm{percent}} = 100D
 $$
 
 Where:
 
-- $D$ — Duty cycle, expressed as a fraction.
-- $D_{\%}$ — Duty cycle, expressed as a percentage.
-- $T_{\mathrm{ON}}$ — Signal ON duration.
-- $T_{\mathrm{OFF}}$ — Signal OFF duration.
-- $T$ — Total switching period.
+- `D` — Duty cycle, expressed as a fraction.
+- `D_percent` — Duty cycle, expressed as a percentage.
+- `T_ON` — Signal ON duration.
+- `T_OFF` — Signal OFF duration.
+- `T` — Total switching period.
 
 ### 🎛️ Arduino PWM Command
 
-For the conventional 8-bit `analogWrite()` scale used on the Arduino Uno, the command ranges from $0$ to $255$.
+For the conventional 8-bit `analogWrite()` scale used on the Arduino Uno, the command ranges from `0` to `255`.
 
 The approximate commanded duty cycle is:
 
 $$
-\boxed{D_{\%}\approx\frac{PWM}{255}\times100}
+D_{\mathrm{percent}} \approx \frac{PWM}{255} \times 100
 $$
 
-For example, if the Arduino sends a PWM command of $128$:
+For example, if the Arduino sends a PWM command of `128`:
 
 $$
-D_{\%}\approx\frac{128}{255}\times100
+D_{\mathrm{percent}} \approx \frac{128}{255} \times 100
 $$
 
 $$
-\boxed{D_{\%}\approx50.2\%}
+D_{\mathrm{percent}} \approx 50.2\%
 $$
 
-Thus, a command of $128$ corresponds to approximately half-scale PWM output.
+Thus, a command of `128` corresponds to approximately half-scale PWM output.
 
 ### 📊 PWM Command Reference
 
-| PWM Command | Approx. Duty Cycle | Interpretation |
+| PWM Command | Approximate Duty Cycle | Interpretation |
 |:---:|:---:|:---|
-| $0$ | $0\%$ | No PWM output |
-| $64$ | $25.1\%$ | Low commanded output |
-| $128$ | $50.2\%$ | Medium commanded output |
-| $192$ | $75.3\%$ | Higher commanded output |
-| $255$ | $100\%$ | Maximum commanded output |
+| 0 | 0% | No PWM output |
+| 64 | 25.1% | Low commanded output |
+| 128 | 50.2% | Medium commanded output |
+| 192 | 75.3% | Higher commanded output |
+| 255 | 100% | Maximum commanded output |
 
-*Percentages are rounded. Actual motor behavior depends on the driver configuration and motor power circuit.*
+*These percentages describe the PWM command, not the exact motor speed. Actual speed depends on battery voltage, driver losses, motor characteristics, and mechanical load.*
+
+---
+
 
 ### 📈 PWM Signal Concept
 
