@@ -23,4 +23,17 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/MODE_01-BLUETOOTH_CONTROL-00E5FF?style=flat-square&labelColor=07111F
+  <img src="https://img.shields.io/badge/MODE_01-BLUETOOTH_CONTROL-00E5FF?style=flat-square&labelColor=07111F" alt="Bluetooth control"/>
+  <img src="https://img.shields.io/badge/MODE_02-OBSTACLE_AVOIDANCE-647CFF?style=flat-square&labelColor=07111F" alt="Obstacle avoidance"/>
+  <img src="https://img.shields.io/badge/MODE_03-LINE_FOLLOWING-00C896?style=flat-square&labelColor=07111F" alt="Line following"/>
+</p>
+
+An embedded robotics platform that combines wireless teleoperation, real-time environmental sensing, and autonomous movement in one four-wheel-drive vehicle.
+
+Overview · Architecture · Hardware · Installation · Operation · Engineering
+
+<br/>
+
+<img src="https://capsule-render.vercel.app/api?type=rect&height=3&color=0:00E5FF,50:647CFF,100:00E5FF&section=header" width="100%" alt=""/>
+
+</div>
