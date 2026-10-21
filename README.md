@@ -1804,23 +1804,13 @@ The selected action is translated into motor-direction signals and PWM commands 
 
 ---
 
+
 ## 📌 Mathematical Summary
 
-| Model | Equation | Application |
-|:---|:---|:---|
-| Ultrasonic distance | $\displaystyle d=\frac{ct}{2}$ | Estimates obstacle distance |
-| HC-SR04 approximation | $\displaystyle d_{\mathrm{cm}}\approx\frac{t_{\mu s}}{58}$ | Simplifies embedded calculations |
-| PWM duty cycle | $\displaystyle D=\frac{T_{\mathrm{ON}}}{T}$ | Defines the ON-time fraction |
-| PWM percentage | $\displaystyle D_{\%}=100D$ | Expresses the duty cycle as a percentage |
-| Arduino PWM command | $\displaystyle D_{\%}\approx\frac{PWM}{255}\times100$ | Estimates the commanded PWM percentage |
-
----
-
-<div align="center">
-
-**END OF SECTION 5 — MATHEMATICAL FOUNDATIONS**
-
-*Multi-Mode Autonomous Smart Robot Car*
-
-</div>
-
+| **Model** | **Equation** | **Application** |
+|:--|:--:|:--|
+| Ultrasonic distance | $d=\frac{c\,t}{2}$ | Estimates obstacle distance |
+| HC-SR04 approximation | $d_{\mathrm{cm}}\approx\frac{t_{\mu s}}{58}$ | Simplifies embedded calculations |
+| PWM duty cycle | $D=\frac{T_{\mathrm{ON}}}{T_{\mathrm{ON}}+T_{\mathrm{OFF}}}$ | Defines the ON-time fraction |
+| PWM percentage | $D_{\%}=100D$ | Expresses the duty cycle as a percentage |
+| Arduino PWM command | $D_{\%}\approx\frac{PWM}{255}\times100$ | Estimates the commanded PWM percentage |
