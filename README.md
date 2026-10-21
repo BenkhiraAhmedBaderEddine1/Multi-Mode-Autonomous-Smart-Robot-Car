@@ -3,7 +3,7 @@
 <img src="assets/robot-car-hero.gif"
      width="100%"
      alt="Multi-Mode Autonomous Smart Robotic Car"/>
-
+    
 <br/>
 
 <img src="https://img.shields.io/badge/ARDUINO-UNO-FF5B69?style=for-the-badge&logo=arduino&logoColor=white&labelColor=160D20"/>
