@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autonomous Robot Car</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #090610;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.scene {
+    width: 100%;
+    max-width: 1000px;
+    height: 360px;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 50% 100%,
+        #371044 0%, #160d24 40%, #090610 75%);
+    border: 1px solid #5e235f;
+    border-radius: 20px;
+}
+
+.title {
+    position: absolute;
+    top: 30px;
+    width: 100%;
+    text-align: center;
+    color: #ffb44a;
+    letter-spacing: 4px;
+    font-size: clamp(14px, 3vw, 24px);
+    text-shadow: 0 0 18px #ff6b35;
+}
+
+.subtitle {
+    position: absolute;
+    top: 65px;
+    width: 100%;
+    text-align: center;
+    color: #c9a8db;
+    font-size: 11px;
+    letter-spacing: 3px;
+}
+
+.road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 45px;
+    height: 4px;
+    background: #ff9b43;
+    box-shadow: 0 0 15px #ff6a35;
+}
+
+.road::after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 200%;
+    border-top: 2px dashed #8f579c;
+    animation: roadMove 1s linear infinite;
+}
+
+.car {
+    position: absolute;
+    bottom: 65px;
+    left: -180px;
+    width: 150px;
+    height: 100px;
+    animation: drive 7s linear infinite;
+}
+
+.chassis {
+    position: absolute;
+    bottom: 22px;
+    left: 12px;
+    width: 126px;
+    height: 36px;
+    background: linear-gradient(135deg, #ffb44a, #f04468);
+    border: 2px solid #ffe0a0;
+    border-radius: 12px 18px 8px 8px;
+    box-shadow: 0 0 20px #f0446877;
+}
+
+.top {
+    position: absolute;
+    bottom: 58px;
+    left: 42px;
+    width: 72px;
+    height: 28px;
+    background: #3b214e;
+    border: 2px solid #b777ff;
+    border-radius: 10px 14px 0 0;
+}
+
+.sensor {
+    position: absolute;
+    top: 3px;
+    left: 67px;
+    width: 16px;
+    height: 10px;
+    background: #8feaff;
+    border-radius: 4px;
+    box-shadow: 0 0 14px #8feaff;
+}
+
+.sensor::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: -22px;
+    width: 60px;
+    height: 40px;
+    border-top: 2px solid #8feaff99;
+    border-radius: 50%;
+}
+
+.headlight {
+    position: absolute;
+    bottom: 35px;
+    right: 5px;
+    width: 12px;
+    height: 10px;
+    background: #fff4b0;
+    border-radius: 50%;
+    box-shadow: 0 0 25px 8px #ffb44a88;
+}
+
+.wheel {
+    position: absolute;
+    bottom: 7px;
+    width: 30px;
+    height: 30px;
+    background: #17121e;
+    border: 5px solid #8f579c;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #b777ff66;
+    animation: spin .45s linear infinite;
+}
+
+.wheel.one { left: 20px; }
+.wheel.two { right: 20px; }
+
+.wheel::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 2px;
+    width: 3px;
+    height: 12px;
+    background: #ffb44a;
+}
+
+.status {
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    color: #b777ff;
+    font-size: 10px;
+    letter-spacing: 3px;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes drive {
+    0% {
+        left: -180px;
+        opacity: 0;
+        transform: scale(.8);
+    }
+    10% { opacity: 1; }
+    45% {
+        left: calc(100% - 150px);
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        left: calc(100% - 150px);
+        opacity: 0;
+        transform: scale(.8);
+    }
+    55% {
+        left: calc(100% - 150px);
+        opacity: 0;
+        transform: scaleX(-1) scale(.8);
+    }
+    60% { opacity: 1; }
+    90% {
+        left: -10px;
+        opacity: 1;
+        transform: scaleX(-1) scale(1);
+    }
+    100% {
+        left: -180px;
+        opacity: 0;
+        transform: scaleX(-1) scale(.8);
+    }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes roadMove {
+    to { transform: translateX(-50%); }
+}
+
+@keyframes blink {
+    50% { opacity: .35; }
+}
+</style>
+</head>
+
+<body>
+<div class="scene">
+
+    <div class="title">AUTONOMOUS ROBOTICS</div>
+    <div class="subtitle">
+        ARDUINO UNO · 4WD · SMART NAVIGATION
+    </div>
+
+    <div class="car">
+        <div class="sensor"></div>
+        <div class="top"></div>
+        <div class="chassis"></div>
+        <div class="headlight"></div>
+        <div class="wheel one"></div>
+        <div class="wheel two"></div>
+    </div>
+
+    <div class="road"></div>
+
+    <div class="status">
+        ● SYSTEM ACTIVE — AUTONOMOUS MODE
+    </div>
+
+</div>
+</body>
+</html>
