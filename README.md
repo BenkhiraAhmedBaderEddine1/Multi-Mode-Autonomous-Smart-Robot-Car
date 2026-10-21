@@ -1548,3 +1548,279 @@ flowchart TB
 
 The robot's behavior can be explained using a few key equations from acoustics, electronics, and differential-drive kinematics.
 
+
+<div align="center">
+
+# 🔴 5. MATHEMATICAL FOUNDATIONS 🟠
+
+**Ultrasonic Distance Measurement • PWM Motor Control**
+
+*Mathematical models underlying the robot's sensing and motion-control systems.*
+
+---
+
+</div>
+
+## 5.1 Ultrasonic Distance Measurement
+
+The HC-SR04 ultrasonic sensor estimates the distance to an obstacle by transmitting an ultrasonic pulse and measuring the time required for its echo to return. Since the sound wave travels to the target and back, the measured time represents a round-trip journey.
+
+### 📐 Fundamental Equation
+
+$$
+\boxed{d=\frac{c\,t}{2}}
+$$
+
+Where:
+
+- $d$ — Distance to the target.
+- $c$ — Speed of sound in air.
+- $t$ — Measured round-trip echo time.
+- $2$ — Accounts for the outward and return journeys.
+
+At approximately $20^\circ\mathrm{C}$, the speed of sound is approximately:
+
+$$
+c=343\ \mathrm{m/s}
+$$
+
+Converting this value into centimetres per microsecond gives:
+
+$$
+c\approx0.0343\ \mathrm{cm}/\mu\mathrm{s}
+$$
+
+Therefore, the distance in centimetres can be calculated as:
+
+$$
+\boxed{d_{\mathrm{cm}}=\frac{t_{\mu s}\times0.0343}{2}}
+$$
+
+### 🧮 Worked Example
+
+For a measured echo duration of $1000\ \mu\mathrm{s}$:
+
+$$
+d=\frac{1000\times0.0343}{2}
+$$
+
+$$
+\boxed{d=17.15\ \mathrm{cm}}
+$$
+
+This means the obstacle is estimated to be approximately $17.15$ centimetres from the sensor.
+
+### ⚡ Simplified HC-SR04 Approximation
+
+A commonly used approximation for Arduino projects is:
+
+$$
+\boxed{d_{\mathrm{cm}}\approx\frac{t_{\mu s}}{58}}
+$$
+
+For the same echo duration:
+
+$$
+d_{\mathrm{cm}}\approx\frac{1000}{58}
+\approx17.24\ \mathrm{cm}
+$$
+
+The small difference between the two results comes from rounding the conversion constant.
+
+### 🔄 Measurement Workflow
+
+```mermaid
+flowchart TB
+    A["HC-SR04 TRANSMITS PULSE"]
+    B["ULTRASONIC WAVE<br/>Travels Toward Target"]
+    C["OBSTACLE REFLECTS WAVE"]
+    D["SENSOR RECEIVES ECHO"]
+    E["ARDUINO MEASURES TIME"]
+    F["DISTANCE CALCULATION"]
+    G["OBSTACLE AVOIDANCE DECISION"]
+
+    A --> B --> C --> D --> E --> F --> G
+
+    classDef sensor fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef process fill:#171717,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef decision fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+
+    class A,D sensor
+    class B,C,E,F process
+    class G decision
+```
+
+<div align="center">
+
+**FIGURE 5.1 — ULTRASONIC DISTANCE-MEASUREMENT PROCESS**
+
+</div>
+
+### ⚠️ Measurement Limitations
+
+The calculated distance is an estimate rather than an exact measurement. Temperature affects the speed of sound, while target angle, surface geometry, reflections, and environmental conditions can affect echo detection.
+
+---
+
+## 5.2 Pulse-Width Modulation (PWM)
+
+Pulse-Width Modulation (PWM) controls the average electrical power delivered to a load by switching a signal between ON and OFF states. In this robotic platform, PWM commands can be applied to the L298N motor driver's enable inputs to regulate motor drive.
+
+### 📐 Duty-Cycle Equation
+
+The duty cycle is the fraction of one switching period during which the signal remains ON.
+
+$$
+\boxed{D=\frac{T_{\mathrm{ON}}}
+{T_{\mathrm{ON}}+T_{\mathrm{OFF}}}}
+$$
+
+The total switching period is:
+
+$$
+T=T_{\mathrm{ON}}+T_{\mathrm{OFF}}
+$$
+
+Therefore:
+
+$$
+D=\frac{T_{\mathrm{ON}}}{T}
+$$
+
+Expressed as a percentage:
+
+$$
+\boxed{D_{\%}=100D}
+$$
+
+Where:
+
+- $D$ — Duty cycle, expressed as a fraction.
+- $D_{\%}$ — Duty cycle, expressed as a percentage.
+- $T_{\mathrm{ON}}$ — Signal ON duration.
+- $T_{\mathrm{OFF}}$ — Signal OFF duration.
+- $T$ — Total switching period.
+
+### 🎛️ Arduino PWM Command
+
+For the conventional 8-bit `analogWrite()` scale used on the Arduino Uno, the command ranges from $0$ to $255$.
+
+The approximate commanded duty cycle is:
+
+$$
+\boxed{D_{\%}\approx\frac{PWM}{255}\times100}
+$$
+
+For example, if the Arduino sends a PWM command of $128$:
+
+$$
+D_{\%}\approx\frac{128}{255}\times100
+$$
+
+$$
+\boxed{D_{\%}\approx50.2\%}
+$$
+
+Thus, a command of $128$ corresponds to approximately half-scale PWM output.
+
+### 📊 PWM Command Reference
+
+| PWM Command | Approx. Duty Cycle | Interpretation |
+|:---:|:---:|:---|
+| $0$ | $0\%$ | No PWM output |
+| $64$ | $25.1\%$ | Low commanded output |
+| $128$ | $50.2\%$ | Medium commanded output |
+| $192$ | $75.3\%$ | Higher commanded output |
+| $255$ | $100\%$ | Maximum commanded output |
+
+*Percentages are rounded. Actual motor behavior depends on the driver configuration and motor power circuit.*
+
+### 📈 PWM Signal Concept
+
+```mermaid
+flowchart LR
+    A["ARDUINO UNO<br/>PWM COMMAND"]
+    B["L298N ENABLE INPUT"]
+    C["MOTOR VOLTAGE<br/>Switching Control"]
+    D["DC MOTOR<br/>Mechanical Response"]
+
+    A --> B --> C --> D
+
+    classDef control fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef driver fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef motor fill:#30120f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+
+    class A control
+    class B,C driver
+    class D motor
+```
+
+<div align="center">
+
+**FIGURE 5.2 — PWM-BASED MOTOR DRIVE CONTROL**
+
+</div>
+
+### ⚙️ Relationship Between PWM and Motor Speed
+
+PWM changes the motor's applied drive conditions, but the duty cycle does not directly specify the exact rotational speed.
+
+Actual speed depends on several factors:
+
+- Battery voltage and its state of charge.
+- Voltage drop and power dissipation in the L298N driver.
+- DC motor electrical and mechanical characteristics.
+- Wheel load, traction, and friction.
+- Starting torque and mechanical resistance.
+
+Consequently, a PWM command of approximately $50\%$ does **not** guarantee that the motor rotates at exactly $50\%$ of its maximum speed.
+
+---
+
+## 5.3 Application to Autonomous Robot Control
+
+The ultrasonic and PWM models work together in the robot's obstacle-avoidance system. The Arduino estimates the distance to an obstacle, compares that estimate with a configured safety threshold, and selects a programmed movement response.
+
+Let $d$ represent the estimated distance and $d_{\mathrm{safe}}$ the configured safety threshold.
+
+$$
+\boxed{
+\begin{cases}
+\text{Avoidance maneuver}, & d\leq d_{\mathrm{safe}}\\[4pt]
+\text{Continue forward}, & d>d_{\mathrm{safe}}
+\end{cases}
+}
+$$
+
+The selected action is translated into motor-direction signals and PWM commands for the L298N driver.
+
+<div align="center">
+
+**🔴 FROM SENSOR MEASUREMENTS TO INTELLIGENT MOTION CONTROL 🟠**
+
+*Distance Estimation → Decision Logic → Motor Command → Robot Movement*
+
+</div>
+
+---
+
+## 📌 Mathematical Summary
+
+| Model | Equation | Application |
+|:---|:---|:---|
+| Ultrasonic distance | $\displaystyle d=\frac{ct}{2}$ | Estimates obstacle distance |
+| HC-SR04 approximation | $\displaystyle d_{\mathrm{cm}}\approx\frac{t_{\mu s}}{58}$ | Simplifies embedded calculations |
+| PWM duty cycle | $\displaystyle D=\frac{T_{\mathrm{ON}}}{T}$ | Defines the ON-time fraction |
+| PWM percentage | $\displaystyle D_{\%}=100D$ | Expresses the duty cycle as a percentage |
+| Arduino PWM command | $\displaystyle D_{\%}\approx\frac{PWM}{255}\times100$ | Estimates the commanded PWM percentage |
+
+---
+
+<div align="center">
+
+**END OF SECTION 5 — MATHEMATICAL FOUNDATIONS**
+
+*Multi-Mode Autonomous Smart Robot Car*
+
+</div>
+
