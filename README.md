@@ -42,3 +42,9 @@ Wireless Teleoperation · Autonomous Navigation · Embedded Intelligence
      width="100%" alt="Design divider"/>
 
 </div>
+
+<div align="center">
+  <img src="assets/robot-car-hero.gif"
+       width="100%"
+       alt="Animated autonomous robotic car">
+</div>
