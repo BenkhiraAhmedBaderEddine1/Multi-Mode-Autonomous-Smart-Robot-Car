@@ -192,3 +192,302 @@ The Arduino Uno supports this role through its digital I/O, analog input, and PW
 **END OF PART I · ABSTRACT & SYSTEM ARCHITECTURE**
 
 </div>
+
+
+
+---
+
+## 🔴🟠 2.2 BLOCK DIAGRAM — SYSTEM ARCHITECTURE 🟠🔴
+
+<div align="center">
+
+### ⚡ THE INTELLIGENCE BEHIND THE ROBOT
+
+**SENSING · PROCESSING · DECISION-MAKING · ACTUATION**
+
+</div>
+
+The following block diagram illustrates the overall architecture of the Multi-Mode Autonomous Smart Robot Car. It presents the communication interface, central processing unit, autonomous navigation algorithms, sensing components, motor driver, and four-wheel-drive locomotion system.
+
+```mermaid
+flowchart TB
+    APP(["📱 SMARTPHONE / PC<br/>Bluetooth Control App"])
+
+    subgraph COMM["01 — WIRELESS COMMUNICATION"]
+        BT["📡 HC-05 Bluetooth Module<br/>Wireless Serial Interface"]
+    end
+
+    subgraph CTRL["02 — CENTRAL PROCESSING UNIT"]
+        MCU["🧠 ARDUINO UNO<br/>ATmega328P Microcontroller"]
+
+        subgraph LOGIC["INTELLIGENT CONTROL LAYER"]
+            MODE["⚙️ Mode Manager"]
+            AVOID["🚧 Obstacle Avoidance"]
+            LINE["🛣️ Line-Following Algorithm"]
+            MANUAL["🎮 Manual Command Processor"]
+        end
+    end
+
+    subgraph SENSORS["03 — ENVIRONMENTAL PERCEPTION"]
+        US["📏 HC-SR04 Ultrasonic Sensor"]
+        SERVO["🔄 SG90 Servo Scanner"]
+        IR["🔎 Three-Channel IR Sensor Array"]
+    end
+
+    subgraph ACT["04 — MOTION CONTROL"]
+        DRIVER["🔋 L298N Dual H-Bridge Driver"]
+        MOTORS["⚡ Four DC Gear Motors"]
+        CHASSIS["🚙 4WD Robotic Chassis"]
+    end
+
+    APP -->|"Wireless commands"| BT
+    BT -->|"Serial data"| MCU
+
+    MCU --> MODE
+    MODE --> MANUAL
+    MODE --> AVOID
+    MODE --> LINE
+
+    US -->|"Distance measurements"| MCU
+    IR -->|"Line-state readings"| MCU
+    MCU -->|"Servo control signal"| SERVO
+    SERVO -->|"Sensor orientation"| US
+
+    MANUAL --> DRIVER
+    AVOID --> DRIVER
+    LINE --> DRIVER
+
+    MCU -->|"PWM + direction signals"| DRIVER
+    DRIVER -->|"Motor power and direction"| MOTORS
+    MOTORS --> CHASSIS
+
+    classDef app fill:#151515,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef comm fill:#24150f,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef central fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef logic fill:#251a16,stroke:#ff8c42,color:#ffffff,stroke-width:1.5px
+    classDef sensor fill:#161c25,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef actuator fill:#201713,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+
+    class APP app
+    class BT comm
+    class MCU central
+    class MODE,AVOID,LINE,MANUAL logic
+    class US,SERVO,IR sensor
+    class DRIVER,MOTORS,CHASSIS actuator
+
+    style COMM fill:#171717,stroke:#ff8c42,stroke-width:2px
+    style CTRL fill:#141414,stroke:#ff3b30,stroke-width:2px
+    style LOGIC fill:#1b1715,stroke:#ff6b35,stroke-width:1px
+    style SENSORS fill:#141414,stroke:#ff8c42,stroke-width:2px
+    style ACT fill:#141414,stroke:#ff3b30,stroke-width:2px
+```
+
+<div align="center">
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+**FIGURE 2.1 — BLOCK DIAGRAM OF THE PROPOSED SMART ROBOT CAR**
+
+🟠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🔴
+
+</div>
+
+### 🔬 Signal Flow and System Interaction
+
+The arrows represent the principal information and control paths between the robot's subsystems. The architecture is organized into four functional layers: wireless communication, intelligent processing, environmental perception, and motion control.
+
+- **Wireless communication:** The HC-05 module receives commands from a compatible smartphone or computer and transmits them to the Arduino Uno through serial communication.
+- **Central processing:** The Arduino Uno interprets incoming commands, reads sensor values, selects the active operating mode, and executes the corresponding control algorithm.
+- **Environmental perception:** The HC-SR04 ultrasonic sensor measures the distance to nearby obstacles, while the three-channel infrared sensor array detects the position of a line relative to the chassis.
+- **Motion control:** The Arduino generates motor direction and PWM speed-control signals. The L298N driver interfaces these low-power control signals with the four DC motors.
+- **Mechanical actuation:** The four geared motors drive the 4WD chassis, allowing the robot to move forward, reverse, turn, and stop.
+
+In the proposed scanning configuration, the SG90 servo changes the orientation of the ultrasonic sensor so that the robot can compare obstacle distances in different directions. The servo is optional and must be installed and connected according to the actual hardware configuration.
+
+**Operating principle:** The Arduino repeatedly reads the sensors, processes received commands, evaluates the selected operating mode, and updates the motor outputs. This continuous control cycle enables manual operation and autonomous navigation.
+
+> **Engineering note:** The SG90 servo and three-sensor digital IR array belong to the expanded proposed configuration. They should be included in the final hardware list and wiring diagram if they are used in the physical implementation. The exact pin assignments and control logic must match the firmware.
+
+---
+
+## 🔴🟠 2.3 OPERATIONAL MODES 🟠🔴
+
+The Multi-Mode Autonomous Smart Robot Car is designed around three principal operating modes. Each mode provides a different method of controlling the robot while using the same central microcontroller, motor driver, and drive system.
+
+<div align="center">
+
+### 🚀 THREE MODES. ONE INTELLIGENT PLATFORM.
+
+| MODE 01 | MODE 02 | MODE 03 |
+|:---:|:---:|:---:|
+| 🎮 Manual Control | 🚧 Obstacle Avoidance | 🛣️ Line Following |
+| Human-directed | Autonomous navigation | Path tracking |
+
+</div>
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+### 🎮 MODE 01 — MANUAL BLUETOOTH CONTROL
+
+<div align="center">
+
+![Bluetooth-controlled Arduino robot car](https://images.openai.com/static-rsc-4/oToQdfaziDoGEgSAyRA0_uClmWFSb2UpKMie5Ofu84Zj3eUsv12kF7b7Kdvq5mcOSNpTQ3NJI0cRU3DZQi-TOP_DGH0BGzrJSgKqScI2e8Zbe4XAwK_AB0gyJsc4XowuCg0bqqNzsxKHXCRHvsl6Afi3r_u6EDoQwQ6ULxjiac0?purpose=inline)
+
+*Figure 2.2 — Conceptual reference for Bluetooth-based robotic control.*
+
+</div>
+
+In manual mode, the operator sends movement commands from a smartphone or computer through a Bluetooth application. The HC-05 module receives these commands and forwards the corresponding serial data to the Arduino Uno.
+
+The microcontroller interprets each command and translates it into the appropriate motor direction and speed settings. Depending on the command received, the robot can move forward, reverse, turn left, turn right, or remain stationary.
+
+A stop command immediately requests that the motor outputs be disabled, bringing the robot to a controlled stop. The command-handling logic should also define how the system behaves when communication is interrupted.
+
+**Control sequence:**
+
+`Operator → Bluetooth App → HC-05 → Arduino Uno → L298N → DC Motors`
+
+**Key characteristics:**
+
+- Direct movement control through a wireless interface.
+- Independent control of motor direction and, where implemented, speed.
+- Immediate response to valid movement and stop commands.
+- Convenient testing, debugging, and manual positioning.
+- A foundation for testing the motors and communication subsystem before autonomous operation.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+### 🚧 MODE 02 — AUTONOMOUS OBSTACLE AVOIDANCE
+
+<div align="center">
+
+![Smart robotic car with obstacle avoidance and ultrasonic sensing](https://images.openai.com/static-rsc-4/a_yNbbJMsgeRRo4wa4zdg1R3qHvx_uBdTD0ZIpA7upIq-s1_oyUaul5lucgOOs60YCIl3fxixvPJqRTfNTltB2f5fM9rCgmoyhG1rhysekTVOn12VJaS0ICqUBpfuqwvCwpjtt9qHwmEFv26XAYF27un7dffBSuzI2V4w52gr8Q?purpose=inline)
+
+*Figure 2.3 — Conceptual reference for an autonomous obstacle-avoidance robot.*
+
+</div>
+
+In autonomous obstacle-avoidance mode, the robot navigates its surroundings without requiring continuous movement commands from the operator. The HC-SR04 ultrasonic sensor measures the distance to objects located ahead of the chassis.
+
+The Arduino continuously compares the measured distance with a predefined safety threshold. When the detected distance exceeds the threshold, the robot can continue moving forward. When an obstacle enters the safety zone, the controller initiates an avoidance procedure.
+
+The proposed avoidance sequence consists of the following steps:
+
+1. **Distance measurement:** The ultrasonic sensor estimates the distance to the nearest object in its current direction.
+2. **Obstacle detection:** The Arduino compares the measurement with the configured safety threshold.
+3. **Controlled stopping:** The motors stop when an obstacle is detected within the defined safety zone.
+4. **Directional scanning:** If the SG90 servo is installed, the ultrasonic sensor is directed toward different angles to measure the available space.
+5. **Direction selection:** The controller compares the measured distances and selects a direction that appears to provide sufficient clearance.
+6. **Obstacle avoidance:** The robot turns toward the selected direction and resumes forward movement when the path is sufficiently clear.
+7. **Recovery procedure:** If both scanned directions appear obstructed, the robot can reverse cautiously before attempting another turn.
+
+**Control sequence:**
+
+`Ultrasonic Sensing → Distance Evaluation → Decision-Making → Motor Control → Navigation`
+
+**Key characteristics:**
+
+- Autonomous detection of nearby obstacles.
+- Distance-based navigation decisions.
+- Optional servo-assisted scanning of the surrounding area.
+- Adaptive turning decisions based on measured clearance.
+- A recovery strategy for situations in which the forward path is blocked.
+
+The effectiveness of this mode depends on sensor placement, measurement reliability, turning space, motor response, and the selected distance threshold. Ultrasonic readings can be affected by object shape, surface properties, and environmental conditions; therefore, the avoidance algorithm should include reasonable measurement validation and stopping margins.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+### 🛣️ MODE 03 — AUTONOMOUS LINE FOLLOWING
+
+<div align="center">
+
+![Line-following robot using infrared sensors](https://images.openai.com/static-rsc-4/rZr92dA6585catSMSIks0gko-Awi_sphSdiYish6YLIEDefaXQo9yE0qPUIQYoA56Hq3WR0MTCCrMCXbEoy23beItZoIfnAZvMsqpU45t4CW5itlXjTO1nwjJ19fOd_f47wXmHHo0EMW87mHvUSugDF9xO3QxvZ0mtGSIsqCP34?purpose=inline)
+
+*Figure 2.4 — Conceptual reference for infrared-based line following.*
+
+</div>
+
+In autonomous line-following mode, the robot tracks a predefined path using three downward-facing infrared (IR) sensors mounted beneath the chassis. The sensors detect differences in reflected infrared light between the line and the surrounding surface.
+
+The three sensor positions provide information about the line's relative position:
+
+- **Left sensor:** Indicates whether the line is detected toward the left side of the robot.
+- **Center sensor:** Indicates whether the line is detected near the center of the sensor array.
+- **Right sensor:** Indicates whether the line is detected toward the right side of the robot.
+
+The Arduino evaluates the combined sensor readings and determines the appropriate movement correction. When the line is detected near the center, the robot continues forward. When the line shifts toward one side, the controller adjusts the relative speeds or directions of the left and right motors to steer back toward the path.
+
+A practical implementation must define the sensor output polarity, since some IR modules produce LOW when a line is detected while others use a different signal convention.
+
+**Typical control behavior:**
+
+| Left IR | Center IR | Right IR | Illustrative response |
+|:---:|:---:|:---:|---|
+| 0 | 1 | 0 | Move forward |
+| 1 | 0 | 0 | Correct toward the left |
+| 0 | 0 | 1 | Correct toward the right |
+| 1 | 1 | 1 | Apply the configured intersection or wide-line behavior |
+| 0 | 0 | 0 | Apply the configured line-loss response |
+
+*Note: This table assumes `1` means that a sensor detects the line. Actual IR module polarity and the behavior for intersections or lost lines must be verified experimentally and implemented in the firmware.*
+
+**Control sequence:**
+
+`IR Sensor Array → Pattern Recognition → Steering Decision → PWM Adjustment → Path Tracking`
+
+**Key characteristics:**
+
+- Autonomous tracking of a marked path.
+- Three-sensor detection for basic directional error estimation.
+- Continuous steering corrections based on the observed line position.
+- Differential motor control for left and right steering.
+- Configurable behavior for intersections, sharp turns, and temporary line loss.
+
+The line-following mode is particularly suitable for structured environments such as educational tracks, laboratories, demonstrations, and predefined robotic routes. Its performance depends on sensor calibration, line contrast, sensor height, chassis alignment, and motor-speed consistency.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+### ⚙️ 2.3.1 MODE SELECTION AND CONTROL PRIORITY
+
+The robot's mode manager determines which control algorithm is allowed to command the motors at a given time. Manual Bluetooth control, obstacle avoidance, and line following should not independently issue conflicting motor commands.
+
+A robust implementation should follow these principles:
+
+- **Single active mode:** Only the selected operating mode should control the drive motors.
+- **Explicit mode switching:** Each valid mode-selection command should update the active mode in a predictable manner.
+- **Safe stopping:** A valid stop command should disable motor movement regardless of the current operating mode.
+- **Sensor validation:** Autonomous modes should handle invalid or missing sensor measurements safely.
+- **Communication-loss handling:** The firmware should define a timeout or safe-stop behavior when expected Bluetooth communication is interrupted, where applicable.
+- **Clear state transitions:** Switching modes should reset or initialize any relevant control variables before the new mode begins.
+
+These principles improve predictability, simplify debugging, and reduce the likelihood of conflicting commands during operation.
+
+---
+
+### 🧩 2.3.2 COMPARISON OF THE THREE MODES
+
+| Feature | Manual Bluetooth | Obstacle Avoidance | Line Following |
+|---|---|---|---|
+| Primary control | Human operator | Arduino algorithm | Arduino algorithm |
+| Main input | Bluetooth commands | Ultrasonic distance | Three IR sensors |
+| Servo required | No | Optional for scanning | No |
+| Wireless connection | Required for remote commands | Not required for autonomous movement | Not required for autonomous movement |
+| Main objective | Direct movement control | Avoid obstacles | Follow a marked path |
+| Motor control | Command-driven | Distance-driven | Sensor-pattern-driven |
+
+---
+
+<div align="center">
+
+## 🔴🟠 INTELLIGENCE IN MOTION 🟠🔴
+
+**One robotic platform. Three operating modes. Multiple navigation capabilities.**
+
+*Designed to demonstrate embedded control, wireless communication, environmental sensing, and autonomous decision-making in an integrated Arduino-based system.*
+
+</div>
+
+---
+
+**Implementation note:** The diagrams and operating descriptions represent the proposed system architecture. The final behavior must be verified against the actual wiring, Arduino firmware, sensor polarity, and motor-driver connections.
+
