@@ -2157,7 +2157,6 @@ flowchart TD
 
 ### 6.4 Bluetooth Command Interface
 
-
 The HC-05 module receives commands from a smartphone or computer and transfers them to the Arduino through serial communication.
 Command	Function
 M	Activate manual mode
