@@ -1807,10 +1807,10 @@ The selected action is translated into motor-direction signals and PWM commands 
 
 ## 📌 Mathematical Summary
 
-| **Model** | **Equation** | **Application** |
-|:--|:--:|:--|
-| Ultrasonic distance | $d=\frac{c\,t}{2}$ | Estimates obstacle distance |
-| HC-SR04 approximation | $d_{\mathrm{cm}}\approx\frac{t_{\mu s}}{58}$ | Simplifies embedded calculations |
-| PWM duty cycle | $D=\frac{T_{\mathrm{ON}}}{T_{\mathrm{ON}}+T_{\mathrm{OFF}}}$ | Defines the ON-time fraction |
-| PWM percentage | $D_{\%}=100D$ | Expresses the duty cycle as a percentage |
-| Arduino PWM command |  $D_{\%}\approx\frac{PWM}{255}\times100$ | Estimates the commanded PWM percentage |
+| Model | Equation | Application |
+|:--|:--|:--|
+| Ultrasonic distance | `d = c * t / 2` | Estimates obstacle distance |
+| HC-SR04 approximation | `d_cm ≈ t_us / 58` | Simplifies embedded calculations |
+| PWM duty cycle | `D = T_ON / (T_ON + T_OFF)` | Defines the ON-time fraction |
+| PWM percentage | `D_percent = 100 * D` | Expresses the duty cycle as a percentage |
+| Arduino PWM command | `D_percent ≈ (PWM / 255) * 100` | Estimates the commanded PWM percentage |
