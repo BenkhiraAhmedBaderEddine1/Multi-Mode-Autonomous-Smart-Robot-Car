@@ -2107,20 +2107,20 @@ The firmware is divided into functions responsible for motor control, sensing, n
 
 The robot operates in one of three primary modes: manual control, obstacle avoidance, or line following.
 
-```mermaid
+
 flowchart TD
     A(["🚀 System Start"]) --> B["Initialize Pins, Motors,<br/>Sensors, Servo & Bluetooth"]
     B --> C["Read Bluetooth Commands"]
     C --> D{"Select Operating Mode"}
 
-    D -->|M| E["🎮 Manual Control"]
+D -->|M| E["🎮 Manual Control"]
     D -->|O| F["🛡️ Obstacle Avoidance"]
     D -->|T| G["📍 Line Following"]
 
-    E --> H["Execute Movement Command"]
+E --> H["Execute Movement Command"]
     H --> C
 
-    F --> I["Measure Distance"]
+F --> I["Measure Distance"]
     I --> J{"Obstacle Detected?"}
     J -->|No| K["Move Forward"]
     J -->|Yes| L["Scan Left and Right"]
@@ -2128,19 +2128,19 @@ flowchart TD
     K --> C
     N --> C
 
-    G --> O["Read Three IR Sensors"]
+G --> O["Read Three IR Sensors"]
     O --> P["Calculate Steering Action"]
     P --> Q["Adjust Motor Direction"]
     Q --> C
 
-    classDef start fill:#172554,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px
+classDef start fill:#172554,stroke:#60A5FA,color:#FFFFFF,stroke-width:2px
     classDef process fill:#1F2937,stroke:#F97316,color:#FFFFFF,stroke-width:1.5px
     classDef decision fill:#451A03,stroke:#FBBF24,color:#FFFFFF,stroke-width:2px
     classDef manual fill:#172554,stroke:#60A5FA,color:#FFFFFF
     classDef obstacle fill:#431407,stroke:#F97316,color:#FFFFFF
     classDef line fill:#064E3B,stroke:#34D399,color:#FFFFFF
 
-    class A start
+class A start
     class B,C,H,I,K,L,N,O,P,Q process
     class D,J decision
     class E manual
