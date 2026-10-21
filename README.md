@@ -817,28 +817,77 @@ The three digital outputs connect to Arduino pins A2, A3, and A4, respectively, 
 
 ### Line Detection and Control
 
-```text
-       IR SENSOR ARRAY
-    ┌───────────────────────┐
-    │   LEFT  CENTER  RIGHT │
-    │    [L]    [C]    [R]  │
-    └───────────┬───────────┘
-                │
-                ▼
-          ARDUINO UNO
-                │
-                ▼
-        LINE-POSITION LOGIC
-                │
-                ▼
-       LEFT / RIGHT PWM
-                │
-                ▼
-          L298N DRIVER
-                │
-                ▼
-        PATH CORRECTION
+```mermaid
+flowchart TB
+    subgraph SENSING["01 — INTELLIGENT SENSING"]
+        direction TB
+        L["◉ LEFT IR SENSOR"]
+        C["◉ CENTER IR SENSOR"]
+        R["◉ RIGHT IR SENSOR"]
+    end
+
+    subgraph PROCESSING["02 — EMBEDDED PROCESSING"]
+        MCU["ARDUINO UNO<br/>ATmega328P"]
+        LOGIC["LINE POSITION ANALYSIS<br/>Sensor Pattern Recognition"]
+        DECISION{"STEERING<br/>DECISION"}
+    end
+
+    subgraph ACTUATION["03 — MOTION CONTROL"]
+        PWM["DUAL PWM CONTROL<br/>Left / Right Speed Adjustment"]
+        DRIVER["L298N MOTOR DRIVER<br/>Dual H-Bridge"]
+    end
+
+    subgraph MOVEMENT["04 — AUTONOMOUS NAVIGATION"]
+        LEFT["LEFT CORRECTION"]
+        FORWARD["FORWARD MOTION"]
+        RIGHT["RIGHT CORRECTION"]
+        PATH(["AUTONOMOUS PATH TRACKING"])
+    end
+
+    L --> MCU
+    C --> MCU
+    R --> MCU
+
+    MCU --> LOGIC
+    LOGIC --> DECISION
+
+    DECISION --> PWM
+    PWM --> DRIVER
+
+    DRIVER --> LEFT
+    DRIVER --> FORWARD
+    DRIVER --> RIGHT
+
+    LEFT --> PATH
+    FORWARD --> PATH
+    RIGHT --> PATH
+
+    classDef sensor fill:#171717,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef controller fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef logic fill:#211714,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef driver fill:#25130f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef movement fill:#171717,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef final fill:#ff3b30,stroke:#ff8c42,color:#ffffff,stroke-width:3px
+
+    class L,C,R sensor
+    class MCU controller
+    class LOGIC,DECISION logic
+    class PWM,DRIVER driver
+    class LEFT,FORWARD,RIGHT movement
+    class PATH final
+
+    style SENSING fill:#101010,stroke:#ff8c42,stroke-width:2px
+    style PROCESSING fill:#101010,stroke:#ff3b30,stroke-width:2px
+    style ACTUATION fill:#101010,stroke:#ff6b35,stroke-width:2px
+    style MOVEMENT fill:#101010,stroke:#ff8c42,stroke-width:2px
 ```
+
+<div align="center">
+
+**🔴 FIGURE — INTELLIGENT IR LINE-TRACKING CONTROL ARCHITECTURE 🟠**
+
+</div>
+
 
 The active output polarity differs among sensor modules. In the proposed firmware, `LOW` is treated as line detection by default. Change that setting after testing the particular modules used in the physical build.
 
