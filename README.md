@@ -52,7 +52,6 @@ Wireless Teleoperation · Autonomous Navigation · Embedded Intelligence
 
 
 
-
 <div align="center">
 
 ## 🔴🟠 ABSTRACT 🟠🔴
