@@ -1446,3 +1446,105 @@ The example firmware uses software serial at 9600 baud. The module must be confi
 
 
 
+## 4.6 Power Wiring Diagram
+
+<div align="center">
+
+### 🔴 PROTECTED POWER DISTRIBUTION ARCHITECTURE 🟠
+
+*Battery Protection • Motor Supply • Regulated 5 V Logic Supply*
+
+</div>
+
+```mermaid
+flowchart TB
+    BAT["PROTECTED BATTERY PACK"]
+    FUSE["PROTECTION FUSE"]
+    SWITCH["POWER SWITCH"]
+
+    subgraph POWER["POWER DISTRIBUTION"]
+        direction LR
+        MOTOR["MOTOR SUPPLY"]
+        BUCK["5 V BUCK CONVERTER"]
+    end
+
+    subgraph MOTOR_SYSTEM["MOTOR POWER BRANCH"]
+        DRIVER["L298N MOTOR DRIVER"]
+        MOTORS["FOUR DC MOTORS"]
+    end
+
+    subgraph LOGIC_SYSTEM["REGULATED LOGIC POWER — 5 V"]
+        direction TB
+        ARDUINO["ARDUINO UNO<br/>5 V Input"]
+        IR["IR LINE SENSORS"]
+        SONAR["HC-SR04"]
+        BT["HC-05 BLUETOOTH MODULE*"]
+        SERVO["SERVO MOTOR**"]
+    end
+
+    BAT --> FUSE
+    FUSE --> SWITCH
+    SWITCH --> MOTOR
+    SWITCH --> BUCK
+
+    MOTOR --> DRIVER
+    DRIVER --> MOTORS
+
+    BUCK --> ARDUINO
+    BUCK --> IR
+    BUCK --> SONAR
+    BUCK --> BT
+    BUCK --> SERVO
+
+    GND["COMMON GROUND REFERENCE"]
+
+    BAT -. "Battery negative" .-> GND
+    DRIVER -.-> GND
+    ARDUINO -.-> GND
+    IR -.-> GND
+    SONAR -.-> GND
+    BT -.-> GND
+    SERVO -.-> GND
+
+    classDef battery fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef protection fill:#24140f,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef power fill:#171717,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef motor fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef logic fill:#191919,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef ground fill:#171717,stroke:#b8b8b8,color:#ffffff,stroke-width:2px
+
+    class BAT battery
+    class FUSE,SWITCH protection
+    class MOTOR,BUCK power
+    class DRIVER,MOTORS motor
+    class ARDUINO,IR,SONAR,BT,SERVO logic
+    class GND ground
+
+    style POWER fill:#101010,stroke:#ff8c42,stroke-width:2px
+    style MOTOR_SYSTEM fill:#101010,stroke:#ff3b30,stroke-width:2px
+    style LOGIC_SYSTEM fill:#101010,stroke:#ff8c42,stroke-width:2px
+```
+
+<div align="center">
+
+**FIGURE — PROTECTED BATTERY DISTRIBUTION AND REGULATED POWER ARCHITECTURE**
+
+</div>
+
+### ⚠️ Electrical Design Notes
+
+- **Initial development:** Power the Arduino through USB and the motors through their appropriate motor supply. Connect the required grounds together.
+- **Power isolation:** Do not connect competing 5 V supplies together without a suitable power-selection or isolation arrangement.
+- **HC-05:** Verify the voltage rating of the exact Bluetooth breakout board before connecting its power input.
+- **Servo:** Ensure the supply can deliver the servo's peak current without causing voltage drops or controller resets.
+- **L298N:** Verify the motor voltage, combined current demand, and driver thermal limits.
+- **Common ground:** Establish a suitable common ground reference for the controller, driver, and signal-connected modules.
+
+> **Important:** This is a functional power-distribution diagram. Actual wiring depends on the battery configuration, regulator design, specific modules, and their current requirements.
+
+---
+
+# 5. Mathematical Foundations
+
+The robot's behavior can be explained using a few key equations from acoustics, electronics, and differential-drive kinematics.
+
