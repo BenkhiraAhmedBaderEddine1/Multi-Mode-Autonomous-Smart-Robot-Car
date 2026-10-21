@@ -761,22 +761,90 @@ The documented operating procedure uses a trigger pulse of approximately 10 micr
 
 ### Measurement Principle
 
-```text
-       HC-SR04                         OBSTACLE
-    ┌────────────┐                    ┌─────────┐
-    │ TRANSMITTER│ ─── Ultrasonic ──► │         │
-    │            │ ◄── Echo return ── │         │
-    └─────┬──────┘                    └─────────┘
-          │
-          ▼
-      ARDUINO UNO
-          │
-          ▼
-    DISTANCE ESTIMATION
-          │
-          ▼
-    AVOIDANCE DECISION
+<div align="center">
+
+## 🔴 ULTRASONIC OBSTACLE DETECTION & AVOIDANCE 🟠
+
+*Echo-Based Distance Measurement • Real-Time Processing • Autonomous Decision-Making*
+
+</div>
+
+```mermaid id="qv8m2p"
+flowchart TB
+    subgraph DETECTION["01 — ULTRASONIC SENSING"]
+        SENSOR["HC-SR04 ULTRASONIC SENSOR"]
+        TX["TRANSMITTER<br/>Ultrasonic Pulse"]
+        RX["RECEIVER<br/>Echo Detection"]
+        OBJECT["OBSTACLE<br/>Sound Wave Reflection"]
+    end
+
+    subgraph PROCESSING["02 — DISTANCE PROCESSING"]
+        MCU["ARDUINO UNO<br/>ATmega328P"]
+        CALC["DISTANCE ESTIMATION<br/>Echo Time Measurement"]
+    end
+
+    subgraph DECISION["03 — AUTONOMOUS DECISION"]
+        CHECK{"OBSTACLE<br/>WITHIN THRESHOLD?"}
+        CLEAR["PATH CLEAR<br/>Continue Forward"]
+        AVOID["OBSTACLE DETECTED<br/>Execute Avoidance Maneuver"]
+    end
+
+    SENSOR --> TX
+    TX -->|"Ultrasonic Wave"| OBJECT
+    OBJECT -->|"Reflected Echo"| RX
+    RX -->|"ECHO Signal"| MCU
+    MCU --> CALC
+    CALC --> CHECK
+
+    CHECK -->|"NO"| CLEAR
+    CHECK -->|"YES"| AVOID
+
+    classDef sensor fill:#24140f,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef wave fill:#171717,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef obstacle fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef controller fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef processing fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef decision fill:#25130f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef safe fill:#17251a,stroke:#55b878,color:#ffffff,stroke-width:2px
+    classDef avoid fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+
+    class SENSOR,TX,RX sensor
+    class OBJECT obstacle
+    class MCU controller
+    class CALC processing
+    class CHECK decision
+    class CLEAR safe
+    class AVOID avoid
+
+    style DETECTION fill:#101010,stroke:#ff8c42,stroke-width:2px
+    style PROCESSING fill:#101010,stroke:#ff3b30,stroke-width:2px
+    style DECISION fill:#101010,stroke:#ff6b35,stroke-width:2px
 ```
+
+<div align="center">
+
+**🔴 FIGURE — HC-SR04 ULTRASONIC SENSING AND AUTONOMOUS OBSTACLE AVOIDANCE 🟠**
+
+</div>
+
+---
+
+### ⚙️ Operating Principle
+
+1. **Ultrasonic Transmission:** The HC-SR04 emits an ultrasonic pulse toward the surrounding environment.
+2. **Echo Reception:** The receiver detects the reflected wave after it encounters an obstacle.
+3. **Distance Estimation:** The Arduino measures the echo duration and estimates the distance using:
+
+   \[
+   d=\frac{t \times v}{2}
+   \]
+
+   where \(d\) is the distance to the obstacle, \(t\) is the measured round-trip echo time, and \(v\) is the speed of sound.
+
+4. **Decision Making:** The estimated distance is compared with a predefined safety threshold.
+5. **Avoidance Action:** If an obstacle is detected within the threshold, the robot initiates its programmed avoidance maneuver; otherwise, it continues forward.
+
+**Engineering note:** The threshold and avoidance maneuver depend on the implemented firmware. The diagram illustrates the control logic rather than specifying an unverified distance threshold or a particular turning sequence.
 
 For a measured echo duration \(t\), the approximate distance is calculated using:
 
