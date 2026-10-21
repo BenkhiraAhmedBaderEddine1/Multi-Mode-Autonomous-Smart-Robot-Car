@@ -959,23 +959,67 @@ The proposed command interface is deliberately simple, allowing the robot to be 
 
 ### Communication Flow
 
-```text
-     SMARTPHONE / PC
-            │
-            │ Bluetooth wireless link
-            ▼
-      ┌────────────┐
-      │   HC-05    │
-      └─────┬──────┘
-            │ UART SERIAL
-            ▼
-      ┌────────────┐
-      │ ARDUINO UNO│
-      └─────┬──────┘
-            │
-            ▼
-      MOTOR / MODE LOGIC
+
+<div align="center">
+
+## 🔴 BLUETOOTH COMMUNICATION & MODE CONTROL 🟠
+
+*Wireless Teleoperation • UART Serial Communication • Embedded Decision Logic*
+
+</div>
+
+```mermaid
+flowchart TB
+    subgraph INPUT["01 — REMOTE CONTROL INTERFACE"]
+        DEVICE["SMARTPHONE / PC<br/>User Command Interface"]
+    end
+
+    subgraph COMMUNICATION["02 — BLUETOOTH COMMUNICATION"]
+        BT["HC-05 BLUETOOTH MODULE"]
+    end
+
+    subgraph PROCESSING["03 — EMBEDDED PROCESSING"]
+        UART["UART SERIAL COMMUNICATION"]
+        MCU["ARDUINO UNO<br/>ATmega328P"]
+        LOGIC["MOTOR / MODE LOGIC<br/>Command Interpretation"]
+    end
+
+    DEVICE -->|"Bluetooth Wireless Link"| BT
+    BT -->|"UART Serial Data"| UART
+    UART --> MCU
+    MCU --> LOGIC
+
+    classDef input fill:#171717,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef bluetooth fill:#24140f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef controller fill:#191919,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+    classDef processing fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+
+    class DEVICE input
+    class BT bluetooth
+    class MCU controller
+    class UART,LOGIC processing
+
+    style INPUT fill:#101010,stroke:#ff8c42,stroke-width:2px
+    style COMMUNICATION fill:#101010,stroke:#ff6b35,stroke-width:2px
+    style PROCESSING fill:#101010,stroke:#ff3b30,stroke-width:2px
 ```
+
+<div align="center">
+
+**🔴 FIGURE — BLUETOOTH COMMAND TRANSMISSION AND EMBEDDED CONTROL FLOW 🟠**
+
+</div>
+
+---
+
+### ⚙️ Communication Workflow
+
+1. **Command Input:** The user sends a command from a smartphone or PC.
+2. **Wireless Transmission:** The HC-05 receives the command through the Bluetooth connection.
+3. **Serial Communication:** The command is transferred to the Arduino Uno through the UART interface.
+4. **Command Processing:** The Arduino interprets the received command and passes control to the motor or operating-mode logic.
+
+
 
 ### Electrical Compatibility
 
