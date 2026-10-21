@@ -42,7 +42,6 @@ Wireless Teleoperation · Autonomous Navigation · Embedded Intelligence
      width="100%" alt="Design divider"/>
 
 
-
 </div>
 
 <div align="center">
