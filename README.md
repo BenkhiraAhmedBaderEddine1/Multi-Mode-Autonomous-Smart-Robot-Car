@@ -7,7 +7,6 @@
 <br/>
 
 
-
 <img src="https://img.shields.io/badge/ARDUINO-UNO-FF5B69?style=for-the-badge&logo=arduino&logoColor=white&labelColor=160D20"/>
 <img src="https://img.shields.io/badge/DRIVE-4WD-FFAD48?style=for-the-badge&labelColor=160D20"/>
 <img src="https://img.shields.io/badge/CONTROL-3%20MODES-B777FF?style=for-the-badge&labelColor=160D20"/>
