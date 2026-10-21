@@ -720,22 +720,85 @@ Both motors on each side generally receive the same direction and PWM command. B
 
 ### Differential Steering Principle
 
-```text
-              FRONT OF ROBOT
-          ┌─────────────────────┐
-          │  LEFT       RIGHT  │
-          │                     │
-          │   M1         M2     │
-          │   ●           ●     │
-          │                     │
-          │   M3         M4     │
-          │   ●           ●     │
-          └─────────────────────┘
-                REAR OF ROBOT
+<div align="center">
 
-       LEFT GROUP       RIGHT GROUP
-       M1 + M3          M2 + M4
+## 🔴 4WD CHASSIS — MOTOR POSITION & DRIVE GROUPS 🟠
+
+*Four-Wheel Drive Layout • Left/Right Motor Grouping*
+
+</div>
+
+```mermaid id="mtr4wd"
+flowchart TB
+    subgraph ROBOT["4WD ROBOT CHASSIS — TOP VIEW"]
+        direction TB
+
+        FRONT["▲ FRONT OF ROBOT"]
+
+        subgraph ROW_FRONT["FRONT MOTOR AXLE"]
+            direction LR
+            M1["M1<br/>FRONT LEFT"]
+            M2["M2<br/>FRONT RIGHT"]
+        end
+
+        subgraph ROW_REAR["REAR MOTOR AXLE"]
+            direction LR
+            M3["M3<br/>REAR LEFT"]
+            M4["M4<br/>REAR RIGHT"]
+        end
+
+        REAR["▼ REAR OF ROBOT"]
+
+        FRONT ~~~ ROW_FRONT
+        ROW_FRONT ~~~ ROW_REAR
+        ROW_REAR ~~~ REAR
+    end
+
+    subgraph GROUPS["MOTOR DRIVE GROUPS"]
+        direction LR
+        LEFT["LEFT GROUP<br/>M1 + M3"]
+        RIGHT["RIGHT GROUP<br/>M2 + M4"]
+    end
+
+    M1 -.-> LEFT
+    M3 -.-> LEFT
+    M2 -.-> RIGHT
+    M4 -.-> RIGHT
+
+    classDef orientation fill:#171717,stroke:#ff8c42,color:#ffffff,stroke-width:2px
+    classDef leftMotor fill:#24140f,stroke:#ff6b35,color:#ffffff,stroke-width:2px
+    classDef rightMotor fill:#30120f,stroke:#ff3b30,color:#ffffff,stroke-width:2px
+    classDef leftGroup fill:#211714,stroke:#ff8c42,color:#ffffff,stroke-width:3px
+    classDef rightGroup fill:#25130f,stroke:#ff3b30,color:#ffffff,stroke-width:3px
+
+    class FRONT,REAR orientation
+    class M1,M3 leftMotor
+    class M2,M4 rightMotor
+    class LEFT leftGroup
+    class RIGHT rightGroup
+
+    style ROBOT fill:#101010,stroke:#ff8c42,stroke-width:2px
+    style ROW_FRONT fill:#151515,stroke:#555555,stroke-width:1px
+    style ROW_REAR fill:#151515,stroke:#555555,stroke-width:1px
+    style GROUPS fill:#101010,stroke:#ff3b30,stroke-width:2px
 ```
+
+<div align="center">
+
+**🔴 FIGURE — FOUR-WHEEL CHASSIS LAYOUT AND LEFT/RIGHT MOTOR CONFIGURATION 🟠**
+
+</div>
+
+---
+
+### ⚙️ Motor Group Configuration
+
+| Drive Group | Motor Positions | Driver Channel |
+|:--|:--|:--|
+| Left group | M1 + M3 | L298N Bridge A |
+| Right group | M2 + M4 | L298N Bridge B |
+
+**Engineering note:** The diagram assumes that M1 and M3 are the left-side motors, while M2 and M4 are the right-side motors. Each pair is connected to its corresponding L298N output channel, provided the combined motor current remains within the driver's limits. Check motor polarity so both wheels on each side propel the robot in the intended direction.
 
 ### Important Mechanical Considerations
 
