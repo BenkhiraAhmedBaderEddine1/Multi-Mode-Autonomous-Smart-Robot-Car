@@ -2146,3 +2146,20 @@ flowchart TD
     class E manual
     class F obstacle
     class G line
+
+
+6.4 Bluetooth Command Protocol
+The HC-05 module receives commands from a smartphone or computer and transfers them to the Arduino through serial communication.
+Command	Function
+M	Activate manual mode
+O	Activate obstacle avoidance mode
+T	Activate line-following mode
+F	Move forward
+B	Move backward
+L	Turn left
+R	Turn right
+S	Stop manual movement
++	Increase motor speed
+-	Decrease motor speed
+
+Note: Commands are interpreted according to the firmware implementation. Test the command mapping and stopping behavior before operating the robot.
