@@ -1813,4 +1813,4 @@ The selected action is translated into motor-direction signals and PWM commands 
 | HC-SR04 approximation | $d_{\mathrm{cm}}\approx\frac{t_{\mu s}}{58}$ | Simplifies embedded calculations |
 | PWM duty cycle | $D=\frac{T_{\mathrm{ON}}}{T_{\mathrm{ON}}+T_{\mathrm{OFF}}}$ | Defines the ON-time fraction |
 | PWM percentage | $D_{\%}=100D$ | Expresses the duty cycle as a percentage |
-| Arduino PWM command | $D_{\%}\approx\frac{PWM}{255}\times100$ | Estimates the commanded PWM percentage |
+| Arduino PWM command |  $D_{\%}\approx\frac{PWM}{255}\times100$ | Estimates the commanded PWM percentage |
