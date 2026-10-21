@@ -491,3 +491,615 @@ These principles improve predictability, simplify debugging, and reduce the like
 
 **Implementation note:** The diagrams and operating descriptions represent the proposed system architecture. The final behavior must be verified against the actual wiring, Arduino firmware, sensor polarity, and motor-driver connections.
 
+# 🔴🟠 03 — HARDWARE COMPONENTS & ENGINEERING SPECIFICATIONS
+
+<div align="center">
+
+# ⚙️ THE HARDWARE CORE
+
+**PRECISION ENGINEERING · EMBEDDED CONTROL · AUTONOMOUS MOBILITY**
+
+`ARDUINO UNO` · `L298N` · `HC-SR04` · `HC-05` · `4WD`
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+</div>
+
+## 3.1 — BILL OF MATERIALS (BOM)
+
+The hardware architecture combines a microcontroller, motor-driving electronics, environmental sensors, wireless communication, and a four-wheel-drive mechanical platform. Each component contributes to a specific function within the integrated robotic system.
+
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Quantity</th>
+<th>Primary Function</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>**Arduino Uno R3**</td><td align="center">1</td><td>Main controller and decision-making unit</td></tr>
+<tr><td>**L298N Dual H-Bridge Module**</td><td align="center">1</td><td>Controls the left and right motor groups</td></tr>
+<tr><td>**DC Geared Motors**</td><td align="center">4</td><td>Provide wheel movement and traction</td></tr>
+<tr><td>**Robot Chassis and Wheels**</td><td align="center">1 set</td><td>Mechanical structure and mobility</td></tr>
+<tr><td>**HC-SR04 Ultrasonic Sensor**</td><td align="center">1</td><td>Measures forward obstacle distance</td></tr>
+<tr><td>**SG90 or Compatible Positional Servo**</td><td align="center">1</td><td>Rotates the ultrasonic sensor</td></tr>
+<tr><td>**Digital IR Line Sensors**</td><td align="center">3</td><td>Detect the line and estimate its relative position</td></tr>
+<tr><td>**HC-05 Bluetooth Module**</td><td align="center">1</td><td>Wireless serial communication</td></tr>
+<tr><td>**Suitable Battery Pack**</td><td align="center">1</td><td>Supplies electrical power to the robot</td></tr>
+<tr><td>**Regulated 5 V Converter**</td><td align="center">1</td><td>Supplies stable power to logic and sensor electronics</td></tr>
+<tr><td>**Jumper Wires and Connectors**</td><td align="center">As required</td><td>Electrical interconnections</td></tr>
+<tr><td>**Power Switch and Fuse**</td><td align="center">1 each</td><td>Power isolation and circuit protection</td></tr>
+<tr><td>**Mounting Hardware**</td><td align="center">As required</td><td>Secures the boards, sensors, and motors</td></tr>
+<tr><td>**Digital Multimeter**</td><td align="center">1 recommended</td><td>Checks voltage, continuity, motor polarity, and ground connections</td></tr>
+</tbody>
+</table>
+
+<div align="center">
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+**ENGINEERING PRINCIPLE**
+
+Every component must be selected according to its electrical ratings, current requirements, physical dimensions, and compatibility with the rest of the system.
+
+🟠━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🔴
+
+</div>
+
+## 3.2 — ARDUINO UNO R3
+
+<div align="center">
+
+### 🧠 THE CENTRAL PROCESSING UNIT
+
+</div>
+
+The Arduino Uno R3 is the central processing unit of the robot. It receives sensor signals, interprets the selected operating mode, processes Bluetooth commands, executes the navigation algorithms, and issues control signals to the motor driver.
+
+### Principal Technical Specifications
+
+| Parameter | Specification |
+|---|---|
+| Microcontroller | ATmega328P |
+| Clock frequency | 16 MHz |
+| Digital I/O pins | 14 |
+| PWM-capable digital pins | 6 |
+| Analog input pins | 6 |
+| Flash memory | 32 KB |
+| SRAM | 2 KB |
+| EEPROM | 1 KB |
+
+### Role Within the Robot
+
+- **Sensor acquisition:** Reads the ultrasonic echo signal and the three digital IR sensor outputs.
+- **Decision-making:** Determines whether manual control, obstacle avoidance, or line following is active.
+- **Motor control:** Generates direction and PWM signals for the L298N module.
+- **Wireless communication:** Receives commands through the HC-05 using serial communication.
+- **Servo positioning:** Sends control signals to orient the ultrasonic sensor.
+
+The program uses ordinary digital I/O for direction control and sensor inputs, PWM outputs for motor speed, and serial communication for Bluetooth.
+
+<details>
+<summary><strong>⚡ Technical Design Note</strong></summary>
+
+The Arduino Uno R3 uses a 5 V logic architecture. Its available SRAM is limited, so the firmware should avoid unnecessary dynamic memory allocation and excessively large strings. Sensor reading, command processing, and motor control should be organized into clear, predictable routines.
+
+The pin configuration must also avoid conflicts between hardware peripherals and software libraries. In the proposed design, D2 and D3 are used for software serial communication, while D5 and D6 provide PWM motor control.
+
+</details>
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.3 — L298N DUAL H-BRIDGE MOTOR DRIVER
+
+<div align="center">
+
+### 🔋 FROM CONTROL SIGNALS TO MECHANICAL MOTION
+
+</div>
+
+The L298N module is a dual H-bridge motor driver. An H-bridge allows a DC motor to rotate in either direction by controlling the polarity of the voltage applied to it. The L298 is designed to drive inductive loads, including DC motors, and provides independent enable inputs for its two bridges.
+
+### Functional Architecture
+
+```text
+              ARDUINO UNO
+                   │
+          Direction + PWM signals
+                   │
+                   ▼
+          ┌───────────────────┐
+          │  L298N DRIVER     │
+          │                   │
+          │  ┌─────────────┐  │
+          │  │  BRIDGE A   │  │
+          │  └──────┬──────┘  │
+          │         │         │
+          │  ┌──────┴──────┐  │
+          │  │  BRIDGE B   │  │
+          │  └──────┬──────┘  │
+          └─────────┼─────────┘
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+     LEFT MOTORS         RIGHT MOTORS
+       2 MOTORS             2 MOTORS
+          │                   │
+          └─────────┬─────────┘
+                    ▼
+               4WD CHASSIS
+```
+
+### Motor Channel Allocation
+
+| Driver Interface | Connection | Function |
+|---|---|---|
+| Bridge A | Two left-side motors | Controls the left motor group |
+| Bridge B | Two right-side motors | Controls the right motor group |
+| IN1 and IN2 | Arduino D7 and D8 | Left motor direction |
+| IN3 and IN4 | Arduino D10 and D11 | Right motor direction |
+| ENA | Arduino D5 PWM | Left motor-group speed command |
+| ENB | Arduino D6 PWM | Right motor-group speed command |
+| Motor supply | Appropriate battery output | Supplies motor power |
+| GND | Common ground | Provides a shared electrical reference |
+
+In this project, the four motors are connected in two side groups. The two left motors share one driver channel, and the two right motors share the other. This arrangement enables differential steering by controlling the direction and relative speed of each side.
+
+### ⚠️ Critical Current and Thermal Limitations
+
+The two-motors-per-channel configuration is valid only if the combined current demand of each motor pair remains within the driver's electrical and thermal limits.
+
+Motor stall current can be substantially higher than normal running current. Before connecting all four motors to a single L298N module, obtain the motor specifications and determine the expected current under starting, turning, and stall conditions.
+
+If the combined current is too high, use a suitable higher-current driver arrangement instead.
+
+The L298N also dissipates power internally, producing heat and reducing the voltage delivered to the motors. A compatible heat sink does not eliminate the need to check current, temperature, and operating limits.
+
+> **Safety requirement:** Do not select the driver based only on the motors' unloaded current. Verify the motor stall current, the driver's current limits, the board's cooling capability, and the power supply's rating.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.4 — FOUR DC GEARED MOTORS
+
+<div align="center">
+
+### 🚙 THE FOUR-WHEEL-DRIVE PROPULSION SYSTEM
+
+</div>
+
+The DC geared motors convert electrical energy into wheel rotation. The integrated gearbox reduces rotational speed while increasing the torque available at the output shaft compared with the motor shaft alone.
+
+In the four-wheel-drive configuration, the motors are arranged into two independently controlled groups:
+
+- **Left motor group:** The front-left and rear-left motors.
+- **Right motor group:** The front-right and rear-right motors.
+
+Both motors on each side generally receive the same direction and PWM command. By changing the relative speeds of the left and right groups, the robot can move forward, reverse, and turn.
+
+### Differential Steering Principle
+
+```text
+              FRONT OF ROBOT
+          ┌─────────────────────┐
+          │  LEFT       RIGHT  │
+          │                     │
+          │   M1         M2     │
+          │   ●           ●     │
+          │                     │
+          │   M3         M4     │
+          │   ●           ●     │
+          └─────────────────────┘
+                REAR OF ROBOT
+
+       LEFT GROUP       RIGHT GROUP
+       M1 + M3          M2 + M4
+```
+
+### Important Mechanical Considerations
+
+- Check the direction of rotation of every motor before final assembly.
+- Verify motor wiring polarity because the mounting orientation can reverse the effective wheel direction.
+- Ensure that the motors on the same side work together rather than opposing each other.
+- Secure the motors and wheels firmly to prevent vibration and misalignment.
+- Test the chassis with its wheels raised before allowing it to move on the floor.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.5 — HC-SR04 ULTRASONIC DISTANCE SENSOR
+
+<div align="center">
+
+### 📡 ENVIRONMENTAL DISTANCE MEASUREMENT
+
+</div>
+
+The HC-SR04 measures the distance to an object using ultrasonic sound waves. The Arduino sends a short trigger pulse, after which the module transmits an ultrasonic burst and produces an echo pulse whose duration corresponds to the round-trip travel time of the sound.
+
+The documented operating procedure uses a trigger pulse of approximately 10 microseconds and recommends an interval greater than 60 milliseconds between measurements.
+
+### Measurement Principle
+
+```text
+       HC-SR04                         OBSTACLE
+    ┌────────────┐                    ┌─────────┐
+    │ TRANSMITTER│ ─── Ultrasonic ──► │         │
+    │            │ ◄── Echo return ── │         │
+    └─────┬──────┘                    └─────────┘
+          │
+          ▼
+      ARDUINO UNO
+          │
+          ▼
+    DISTANCE ESTIMATION
+          │
+          ▼
+    AVOIDANCE DECISION
+```
+
+For a measured echo duration \(t\), the approximate distance is calculated using:
+
+\[
+d=\frac{v\,t}{2}
+\]
+
+where:
+
+- \(d\) is the distance to the target.
+- \(v\) is the speed of sound in air.
+- \(t\) is the measured round-trip echo duration.
+- The division by two accounts for the sound travelling to the target and back.
+
+In practical implementations, the speed of sound is often approximated as \(343\ \text{m/s}\) near room temperature. Actual readings depend on environmental conditions and sensor characteristics.
+
+### Role in Obstacle Avoidance
+
+The sensor is mounted on a servo so that it can examine the front, left, and right directions. The Arduino evaluates the measured distance and determines whether the robot should continue forward, stop, scan, or turn.
+
+**Important limitation:** The HC-SR04 is not a complete collision-prevention system. Its performance depends on the target's size, shape, orientation, acoustic reflectivity, and the operating environment. Very narrow, angled, or acoustically difficult objects may not produce reliable readings.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.6 — SG90 POSITIONAL SERVO MOTOR
+
+<div align="center">
+
+### 🔄 ACTIVE SENSOR ORIENTATION
+
+</div>
+
+The SG90 or a compatible positional servo rotates the ultrasonic sensor toward selected angles. This adds directional scanning to the obstacle-avoidance system without requiring a second ultrasonic sensor.
+
+### Proposed Servo Angles
+
+| Commanded Angle | Intended Direction |
+|---:|---|
+| 90° | Forward |
+| 150° | Left |
+| 30° | Right |
+
+These angles are initial settings. The actual direction depends on the physical orientation of the servo and its mounting bracket. Recalibrate the angles so that the sensor faces the intended direction.
+
+The Arduino Servo library provides the interface for setting the commanded servo position.
+
+### Power and Integration
+
+- Connect the servo signal wire to Arduino D12 in the proposed pin configuration.
+- Supply the servo from a regulated source capable of providing its current demand.
+- Establish a common ground between the servo supply and Arduino when required by the signal interface.
+- Keep the servo wiring secure to prevent movement or intermittent connections during scanning.
+
+> **Power warning:** Connecting a servo directly to the Arduino 5 V pin can cause voltage dips, resets, or unreliable behavior, particularly when the servo starts moving or encounters mechanical resistance. Use an appropriately rated regulated supply.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.7 — INFRARED LINE-TRACKING SENSOR ARRAY
+
+<div align="center">
+
+### 🛣️ PATH DETECTION & STEERING CORRECTION
+
+</div>
+
+The infrared modules typically contain an infrared emitter and a light-sensitive receiver. Their outputs change according to the amount of reflected infrared light.
+
+A black line on a light-colored floor often produces a different reading from the surrounding surface. The controller uses these differences to estimate whether the line is positioned toward the left, near the center, or toward the right of the sensor array.
+
+### Three-Sensor Configuration
+
+| Sensor | Position | Primary Function |
+|---|---|---|
+| Left IR sensor | Left side | Detects a line displaced toward the left |
+| Center IR sensor | Center | Indicates whether the line is approximately centered |
+| Right IR sensor | Right side | Detects a line displaced toward the right |
+
+The three digital outputs connect to Arduino pins A2, A3, and A4, respectively, in left-to-right order.
+
+### Line Detection and Control
+
+```text
+       IR SENSOR ARRAY
+    ┌───────────────────────┐
+    │   LEFT  CENTER  RIGHT │
+    │    [L]    [C]    [R]  │
+    └───────────┬───────────┘
+                │
+                ▼
+          ARDUINO UNO
+                │
+                ▼
+        LINE-POSITION LOGIC
+                │
+                ▼
+       LEFT / RIGHT PWM
+                │
+                ▼
+          L298N DRIVER
+                │
+                ▼
+        PATH CORRECTION
+```
+
+The active output polarity differs among sensor modules. In the proposed firmware, `LOW` is treated as line detection by default. Change that setting after testing the particular modules used in the physical build.
+
+### Installation Considerations
+
+- Mount the sensors securely underneath the front of the chassis.
+- Keep the sensors at a suitable height above the floor.
+- Position the sensors in left-to-right order.
+- Calibrate the sensors using the actual line and surface.
+- Test the output polarity before implementing the line-following logic.
+- Define safe behavior for intersections and situations in which the line is lost.
+
+The recommended sensor height and spacing depend on the specific sensor boards, line width, and surface finish.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.8 — HC-05 BLUETOOTH COMMUNICATION MODULE
+
+<div align="center">
+
+### 📱 WIRELESS COMMAND & CONTROL INTERFACE
+
+</div>
+
+The HC-05 provides a wireless serial connection between the robot and a compatible smartphone or computer. A Bluetooth application transmits simple character commands, which the Arduino reads and converts into control actions.
+
+The proposed command interface is deliberately simple, allowing the robot to be controlled with most compatible serial Bluetooth terminal applications or a suitable custom interface.
+
+### Communication Flow
+
+```text
+     SMARTPHONE / PC
+            │
+            │ Bluetooth wireless link
+            ▼
+      ┌────────────┐
+      │   HC-05    │
+      └─────┬──────┘
+            │ UART SERIAL
+            ▼
+      ┌────────────┐
+      │ ARDUINO UNO│
+      └─────┬──────┘
+            │
+            ▼
+      MOTOR / MODE LOGIC
+```
+
+### Electrical Compatibility
+
+On common HC-05 breakout boards, the power input may accept 5 V because the board includes a regulator. However, the serial RX logic input may still require a reduced signal level.
+
+Protect the module by placing a suitable voltage divider or level shifter between Arduino TX and HC-05 RX. One reference circuit uses 1 kΩ and 2 kΩ resistors to reduce the Arduino's 5 V TX signal.
+
+The example firmware uses software serial at 9600 baud. The module must be configured for a matching baud rate in normal data mode.
+
+> **Compatibility warning:** Check the exact module's documentation before applying power. A bare HC-05 module and a regulator-equipped breakout board are not electrically identical.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 3.9 — BATTERY & POWER DISTRIBUTION SYSTEM
+
+<div align="center">
+
+### 🔋 STABLE POWER · RELIABLE CONTROL · SAFE OPERATION
+
+</div>
+
+The power system must support two different categories of electrical load:
+
+- **Motors:** Demand comparatively high current, particularly during starting or sudden direction changes.
+- **Logic and sensors:** Require a stable supply voltage to prevent microcontroller resets and false readings.
+
+A suitable design uses an appropriately rated battery pack for the motors and a regulated 5 V supply for the Arduino and logic components, sharing a common ground where required by the driver and signal interfaces.
+
+### Power-System Overview
+
+```text
+          BATTERY PACK
+                │
+                ▼
+        ┌───────────────┐
+        │ POWER SWITCH  │
+        └───────┬───────┘
+                │
+                ▼
+        ┌───────────────┐
+        │ PROTECTION    │
+        │ FUSE          │
+        └───────┬───────┘
+                │
+         ┌──────┴─────────┐
+         │                │
+         ▼                ▼
+  MOTOR POWER       REGULATED SUPPLY
+         │                │
+         ▼                ▼
+      L298N          ARDUINO + LOGIC
+         │                │
+         ▼                ├── HC-05
+    FOUR MOTORS           ├── IR SENSORS
+                          ├── HC-SR04
+                          └── SERVO*
+
+*Servo power must be sized for its current demand.
+All required signal interfaces must share a suitable common ground.
+```
+
+### Example: Two 18650 Cells in Series
+
+If two conventional 18650 lithium-ion cells are connected in series, the pack is nominally 7.4 V and reaches approximately 8.4 V when fully charged, assuming 3.7 V nominal cells charged to 4.2 V each.
+
+This voltage must be checked against the motors and driver before use.
+
+### Battery Safety Requirements
+
+- Use a properly assembled and protected battery pack with a compatible charger and battery-management arrangement.
+- Check battery polarity before connecting the circuit.
+- Choose wiring, connectors, and a fuse suitable for the expected current.
+- Prevent short circuits and protect the battery against physical damage.
+- Confirm that the regulated supply can provide sufficient current for the connected electronics.
+- Never connect an unregulated motor battery directly to the Arduino's 5 V pin.
+- Do not assume that an L298N module's onboard regulator or jumper is configured identically on every board.
+
+Incorrect charging, short circuits, physical damage, or the use of unsuitable loose 18650 cells can create fire and injury risks.
+
+---
+
+<div align="center">
+
+# 🔴🟠 04 — ELECTRICAL WIRING & PIN CONFIGURATION
+
+**SIGNAL ROUTING · MOTOR CONTROL · SENSOR INTEGRATION**
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+</div>
+
+A consistent pin map prevents conflicts between the motor driver, sensor inputs, servo, and Bluetooth serial connection. The following configuration is the proposed wiring arrangement for the firmware described in this project.
+
+## 4.1 — ARDUINO PIN ASSIGNMENT
+
+| Arduino Pin | Connected Component | Function |
+|---|---|---|
+| D2 | HC-05 TXD → Arduino | Bluetooth serial RX |
+| D3 | Arduino → HC-05 RXD | Bluetooth serial TX through a level divider |
+| D5 (PWM) | L298N ENA | Left motor-group speed |
+| D6 (PWM) | L298N ENB | Right motor-group speed |
+| D7 | L298N IN1 | Left motor direction |
+| D8 | L298N IN2 | Left motor direction |
+| D10 | L298N IN3 | Right motor direction |
+| D11 | L298N IN4 | Right motor direction |
+| D12 | Servo signal | Ultrasonic sensor positioning |
+| A0 | HC-SR04 TRIG | Ultrasonic trigger |
+| A1 | HC-SR04 ECHO | Echo pulse input |
+| A2 | Left IR sensor output | Left line detection |
+| A3 | Center IR sensor output | Center line detection |
+| A4 | Right IR sensor output | Right line detection |
+| GND | All relevant modules | Common signal reference |
+
+Pins A0–A4 are used as digital I/O in addition to their analog-input functionality.
+
+### Pin-Map Design Notes
+
+- D5 and D6 provide PWM outputs for the two motor groups.
+- D7, D8, D10, and D11 provide the direction signals for the L298N.
+- D2 and D3 are assigned to software serial communication with the HC-05.
+- A0 and A1 provide the trigger and echo connections for the HC-SR04.
+- A2, A3, and A4 read the three IR sensor outputs.
+- D12 provides the servo control signal.
+
+Verify the selected pins against the exact firmware and the libraries used by the project before powering the circuit.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 4.2 — L298N MOTOR CONNECTIONS
+
+| L298N Terminal | Connection |
+|---|---|
+| OUT1 and OUT2 | Two left-side motors, connected in parallel |
+| OUT3 and OUT4 | Two right-side motors, connected in parallel |
+| ENA | Arduino D5 |
+| IN1 | Arduino D7 |
+| IN2 | Arduino D8 |
+| ENB | Arduino D6 |
+| IN3 | Arduino D10 |
+| IN4 | Arduino D11 |
+| Motor supply | Appropriate motor battery voltage |
+| GND | Battery negative and Arduino common ground |
+
+If the board's ENA and ENB jumpers permanently enable the motor channels, remove them when using D5 and D6 for PWM, following the documentation for the actual board.
+
+When testing for the first time, raise the wheels clear of the floor. If one motor rotates backward relative to its partner, disconnect power and correct that motor's wiring polarity.
+
+> **Current verification:** Confirm that the two motors connected to each bridge do not exceed the driver's current and thermal limits. If they do, select a suitable driver configuration before operating the robot.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 4.3 — HC-SR04 CONNECTIONS
+
+| HC-SR04 Pin | Arduino Connection |
+|---|---|
+| VCC | Regulated 5 V |
+| GND | Common ground |
+| TRIG | Arduino A0 |
+| ECHO | Arduino A1 |
+
+The commonly used HC-SR04 provides 5 V logic signals. When replacing it with a 3.3 V sensor or another variant, verify the signal-level requirements.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 4.4 — IR SENSOR CONNECTIONS
+
+Each sensor's power and ground connect to the appropriate regulated supply and common ground. Their three digital outputs connect to A2, A3, and A4 in left-to-right order.
+
+| IR Sensor | Output Connection |
+|---|---|
+| Left sensor | Arduino A2 |
+| Center sensor | Arduino A3 |
+| Right sensor | Arduino A4 |
+| VCC | Appropriate regulated supply |
+| GND | Common ground |
+
+The sensors should be securely mounted underneath the front of the chassis and positioned close enough to the floor for dependable reflection measurements. The recommended height and spacing depend on the particular sensor boards, line width, and surface finish.
+
+🔴━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━🟠
+
+## 4.5 — HC-05 CONNECTIONS
+
+| HC-05 Pin | Arduino Connection |
+|---|---|
+| TXD | D2 |
+| RXD | D3 through a voltage divider or level shifter |
+| GND | Common ground |
+| VCC | Supply appropriate for the exact HC-05 board |
+
+The example firmware uses software serial at 9600 baud. The module must be configured for a matching baud rate in normal data mode.
+
+### 🔌 Recommended Pre-Power Checklist
+
+- [ ] Verify the Arduino pin assignments against the firmware.
+- [ ] Confirm the polarity of the battery and motor connections.
+- [ ] Check that all required grounds are connected.
+- [ ] Verify the HC-05 RX voltage-level protection.
+- [ ] Confirm that the servo and regulated supply can handle their expected current.
+- [ ] Check the L298N current and thermal limits.
+- [ ] Verify the IR sensor output polarity.
+- [ ] Raise the wheels clear of the floor for the first motor test.
+- [ ] Test the emergency stop and motor-stop behavior before autonomous operation.
+
+---
+
+<div align="center">
+
+## 🔴🟠 ENGINEERED FOR CONTROL. DESIGNED FOR AUTONOMY. 🟠🔴
+
+**MULTI-MODE AUTONOMOUS SMART ROBOT CAR**
+
+*University of Boumerdes — IGEE*
+
+</div>
+
+
+
