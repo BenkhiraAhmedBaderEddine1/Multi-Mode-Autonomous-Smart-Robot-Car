@@ -1,5 +1,27 @@
 <div align="center">
 
+# 🤖 MULTI-MODE AUTONOMOUS SMART ROBOT CAR
+
+### Autonomous Navigation • Embedded Systems • Intelligent Control
+
+![Arduino](https://img.shields.io/badge/ARDUINO-UNO-FF4757?style=for-the-badge&logo=arduino&logoColor=white)
+![Drive](https://img.shields.io/badge/DRIVE-4WD-FFAD42?style=for-the-badge)
+![Modes](https://img.shields.io/badge/CONTROL-3_MODES-B56CFF?style=for-the-badge)
+![Language](https://img.shields.io/badge/LANGUAGE-EMBEDDED_C%2B%2B-F1EDFF?style=for-the-badge)
+
+**One Robot. Three Modes. Intelligent Movement.**
+
+</div>
+
+---
+
+
+
+
+
+
+<div align="center">
+
 
 <img src="assets/robot-car-hero.gif"
      width="100%"
