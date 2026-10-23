@@ -16,11 +16,6 @@
 ---
 
 
-<br/><br/>
-
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=18&duration=2400&pause=700&color=FFAD48&center=true&vCenter=true&width=900&lines=AUTONOMY+IN+MOTION.;SENSE+THE+WORLD.+MAKE+DECISIONS.+MOVE.;BLUETOOTH+%7C+OBSTACLE+AVOIDANCE+%7C+LINE+FOLLOWING."
-     alt="Animated robotics tagline"/>
-
 <h1>MULTI-MODE AUTONOMOUS SMART ROBOTIC CAR</h1>
 
 <p>
