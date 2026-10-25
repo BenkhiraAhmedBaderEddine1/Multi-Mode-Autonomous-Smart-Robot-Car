@@ -208,6 +208,8 @@ The Arduino Uno supports this role through its digital I/O, analog input, and PW
 
 The following block diagram illustrates the overall architecture of the Multi-Mode Autonomous Smart Robot Car. It presents the communication interface, central processing unit, autonomous navigation algorithms, sensing components, motor driver, and four-wheel-drive locomotion system.
 
+
+
 ```mermaid
 flowchart TB
     APP(["📱 SMARTPHONE / PC<br/>Bluetooth Control App"])
@@ -280,6 +282,9 @@ flowchart TB
     style SENSORS fill:#141414,stroke:#ff8c42,stroke-width:2px
     style ACT fill:#141414,stroke:#ff3b30,stroke-width:2px
 ```
+
+
+
 
 <div align="center">
 
@@ -610,6 +615,9 @@ The L298N module is a dual H-bridge motor driver. An H-bridge allows a DC motor 
 
 </div>
 
+
+
+
 ```mermaid
 flowchart TB
     subgraph USER["01 — USER INTERFACE"]
@@ -663,6 +671,9 @@ flowchart TB
     style CONTROL fill:#101010,stroke:#ff3b30,stroke-width:2px
     style OUTPUT fill:#101010,stroke:#ff8c42,stroke-width:2px
 ```
+
+
+
 
 <div align="center">
 
